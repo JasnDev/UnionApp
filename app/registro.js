@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
-import Registro from '../components/InputsRegistro';
+import Registro from '../components/Registro';
 
 export default function App() {
   return (

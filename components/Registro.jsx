@@ -1,5 +1,6 @@
 import React from "react";
 import { StyleSheet ,TextInput, View, Pressable, Text } from "react-native";
+import { Link } from "expo-router";
 
 const Registro = () => {
     return (
@@ -25,10 +26,12 @@ const Registro = () => {
             <TextInput 
                 placeholder="Confirme sua senha."
             />
-
+            
+            <Link href={'/login'}>
             <Pressable>
                 <Text>Confirme</Text>
             </Pressable>
+            </Link>
         </View>
     );
 };
