@@ -1,12 +1,14 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import Header from '../components/Header'
+import Topicos from '../components/Topicos'
 
 export default function App() {
   return (
     <View>
       <View>
         <Header />
+      <Topicos/>
       </View>
       <View style={styles.container}>
         <Text>Open up App.js to start working on your app!</Text>
