@@ -1,7 +1,7 @@
 {
   "name": "unionapp",
   "version": "1.0.0",
-  "main": "expo-router/entry",
+  "main": "expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -9,10 +9,9 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@expo/metro-runtime": "~3.2.3",
     "@react-navigation/native": "^6.1.18",
     "expo": "~51.0.28",
-    "expo-constants": "~16.0.2",
-    "expo-linking": "~6.3.1",
     "expo-status-bar": "~1.12.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
