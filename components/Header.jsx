@@ -1,22 +1,19 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { Link } from 'expo-router';
+import { View, StyleSheet, Pressable } from 'react-native';
 
 const Header = () => {
     return (
         <View style={styles.headerContainer}>
 
-            {/* Ícone de perfil alinhado à esquerda */}
-            <Link href="/login" asChild>
-                <TouchableOpacity style={styles.iconLeft}>
+                <Pressable style={styles.iconLeft}>
                     <FontAwesome name="user-o" size={24} color="#000" />
-                </TouchableOpacity>
-            </Link>
+                </Pressable>
 
-            <TouchableOpacity style={styles.iconCenter}>
-                <AntDesign name="pluscircleo" size={35} color="#000" />
-            </TouchableOpacity>
+                <Pressable style={styles.iconCenter}>
+                    <AntDesign name="pluscircleo" size={35} color="#000" />
+                </Pressable>
+                
         </View>
     );
 };

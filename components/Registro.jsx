@@ -1,6 +1,5 @@
 import React, {useState} from "react";
 import { StyleSheet, TextInput, View, Pressable, Text, Alert } from "react-native";
-import { Link } from "expo-router";
 
 const Registro = () => {
     const [email, setEmail] = useState('');
@@ -69,11 +68,10 @@ const Registro = () => {
             </Text> 
             : null}
 
-            <Link href={'/login'}>
-                <Pressable style={styles.button} accessibilityLabel="botão para confirmar o registro">
-                    <Text style={styles.buttonText}>Confirme</Text>
-                </Pressable>
-            </Link>
+
+            <Pressable style={styles.button} accessibilityLabel="botão para confirmar o registro">
+                <Text style={styles.buttonText}>Confirme</Text>
+            </Pressable>
         </View>
     );
 };
