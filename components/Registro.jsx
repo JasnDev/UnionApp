@@ -27,11 +27,10 @@ const Registro = () => {
         <View style={styles.container} accessible={true} accessibilityLabel="Tela de registro do usuário.">
             <Text style={styles.title}>Registro</Text>
 
-            <Text style={styles.label} accessibilityLabel="Nome do usuário.">Nome de Usuário: </Text>
+            <Text style={styles.label}>Nome de Usuário: </Text>
             <TextInput
                 style={styles.input}
                 placeholder="Insira o nome de usuário."
-                accessibilityLabel="Campo de texto para inserir o nome do usuário."
             />
 
             <Text style={styles.label}>E-mail: </Text>
@@ -43,15 +42,13 @@ const Registro = () => {
                     setEmail(text);
                     validacaoDados();
                 }}
-                accessibilityLabel="Campo de texto para inserir seu e-mail."
                 keyboardType="email-address"
             />
 
-            <Text style={styles.label} accessibilityLabel="Campo de texto para inserir sua senha.">Senha: </Text>   
+            <Text style={styles.label}>Senha: </Text>   
             <TextInput 
                 style={styles.input}
                 placeholder="Insira sua senha."
-                accessibilityLabel="Campo de texto para inserir sua senha."
                 onChangeText={(text) =>{
                     setSenha(text);
                     validacaoDados();
@@ -62,12 +59,14 @@ const Registro = () => {
             <TextInput 
                 style={styles.input}
                 placeholder="Confirme sua senha."
-                accessibilityLabel="Confirme sua senha."
             />
 
             {error ? 
-            <Text style={styles.errorText} 
-            accessibilityLabel={error}>{error}</Text> 
+            <Text style={styles.errorText}
+            accessible={true} 
+            accessibilityLabel={error}>
+                {error}
+            </Text> 
             : null}
 
             <Link href={'/login'}>
