@@ -40,7 +40,7 @@ const Topicos = () => {
 
 const estilos = StyleSheet.create({
   telaCompleta: {
-    width: Dimensions.get('window').width, // Ocupa toda a largura da tela
+    // Ocupa toda a largura da tela
     height: Dimensions.get('window').height, // Ocupa toda a altura da tela
     alignItems: 'center',
   },
