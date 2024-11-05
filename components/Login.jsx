@@ -1,35 +1,58 @@
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet, TextInput, View, Pressable, Text } from "react-native";
-import { Link } from "expo-router";
+import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
+
 
 const Login = () => {
+    const[email,setemail]=useState('');
+    const [senha,setsenha]=useState('');
+
+    const navigation = useNavigation()
+    async function logi (){
+        await axios.post('http://localhost:3030/login',{
+             email:email,
+             senha:senha
+             
+         },{
+            headers: {'Content-Type': 'application/json'}
+         }).then(async(response)=>{
+            localStorage.setItem('Authorization-token',response.data.jwt)
+            console.log("deu certo")
+            navigation.navigate('Home')
+         }).catch((error) => {
+            console.log(error)
+         })
+     }
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Login</Text>
 
             <Text style={styles.label}>E-mail: </Text>
             <TextInput
+                onChange={(e) => setemail(e.target.value)}
                 style={styles.input}
                 placeholder="Insira seu e-mail."
             />
 
             <Text style={styles.label}>Senha: </Text>
             <TextInput 
+                onChange={(e) => setsenha(e.target.value)}
                 style={styles.input}
                 placeholder="Insira sua senha."
             />
 
-            <Link href={'/'}>
-                <Pressable style={styles.button}>
+        
+                <Pressable style={styles.button} onPress={logi}>
                     <Text style={styles.buttonText}>Entrar</Text>
                 </Pressable>
-            </Link>
+           
 
-            <Link href={'/registro'}>
-                <Pressable style={[styles.button, styles.registerButton]}>
+           
+                <Pressable style={[styles.button, styles.registerButton]} onPress={() => navigation.navigate("Register")}>
                     <Text style={[styles.buttonText, styles.registerButtonText]}>Registrar</Text>
                 </Pressable>
-            </Link>
+           
 
             <Text style={styles.orText}>Entrar com:</Text>
 

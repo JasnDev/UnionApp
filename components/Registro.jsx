@@ -1,12 +1,26 @@
 import React, {useState} from "react";
 import { StyleSheet, TextInput, View, Pressable, Text, Alert } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import axios from 'axios'
 
 const Registro = () => {
-    const [email, setEmail] = useState('');
+    const [email, setemail] = useState('');
     const [error, setError] = useState('');
-    const [senha, setSenha] = useState('');
+    const [senha, setsenha] = useState('');
+    const [nome,setnome] = useState('')
+    
 
-    const emailRegex = /^\S+@\S+\.\S+$/;
+    const navigation = useNavigation()
+    async function regi (){
+       await axios.post('http://10.145.45.50:3030/registro',{
+            nome:nome,
+            email:email,
+            senha:senha
+        }).then(() => {navigation.navigate("Login")}).catch((error) => {
+            console.log(error)
+        })
+        
+    }
     const validacaoDados = () => {
         if (!emailRegex.test(email)) {
             setError('Email inválido.');
@@ -30,6 +44,7 @@ const Registro = () => {
             <TextInput
                 style={styles.input}
                 placeholder="Insira o nome de usuário."
+                onChange={(e) => setnome(e.target.value)}
             />
 
             <Text style={styles.label}>E-mail: </Text>
@@ -37,10 +52,8 @@ const Registro = () => {
                 style={styles.input}
                 placeholder="Insira seu e-mail."
                 value={email}
-                onChangeText={(text) =>{
-                    setEmail(text);
-                    validacaoDados();
-                }}
+                onChange={(e) => setemail(e.target.value)}
+
                 keyboardType="email-address"
             />
 
@@ -48,10 +61,7 @@ const Registro = () => {
             <TextInput 
                 style={styles.input}
                 placeholder="Insira sua senha."
-                onChangeText={(text) =>{
-                    setSenha(text);
-                    validacaoDados();
-                }}
+                onChange={(e) => setsenha(e.target.value)}
             />
 
             <Text style={styles.label}>Confirme sua senha: </Text>
@@ -69,7 +79,7 @@ const Registro = () => {
             : null}
 
 
-            <Pressable style={styles.button} accessibilityLabel="botão para confirmar o registro">
+            <Pressable style={styles.button} accessibilityLabel="botão para confirmar o registro" onPress={regi}> 
                 <Text style={styles.buttonText}>Confirme</Text>
             </Pressable>
         </View>
