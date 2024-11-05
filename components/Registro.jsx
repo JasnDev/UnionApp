@@ -1,16 +1,17 @@
 import React, {useState} from "react";
-import { StyleSheet, TextInput, View, Pressable, Text, Alert } from "react-native";
+import { StyleSheet, TextInput, View, Pressable, Text } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import axios from 'axios'
 
 const Registro = () => {
-    const [email, setemail] = useState('');
+    const [email, setEmail] = useState('');
     const [error, setError] = useState('');
-    const [senha, setsenha] = useState('');
-    const [nome,setnome] = useState('')
+    const [senha, setSenha] = useState('');
+    const [nome,setNome] = useState('');
     
 
-    const navigation = useNavigation()
+    const navigation = useNavigation();
+
     async function regi (){
        await axios.post('http://10.145.45.50:3030/registro',{
             nome:nome,
@@ -19,8 +20,10 @@ const Registro = () => {
         }).then(() => {navigation.navigate("Login")}).catch((error) => {
             console.log(error)
         })
-        
-    }
+    };
+
+    const emailRegex = /^\S+@\S+\.\S+$/;
+
     const validacaoDados = () => {
         if (!emailRegex.test(email)) {
             setError('Email inválido.');
@@ -44,7 +47,7 @@ const Registro = () => {
             <TextInput
                 style={styles.input}
                 placeholder="Insira o nome de usuário."
-                onChange={(e) => setnome(e.target.value)}
+                onChange={(e) => setNome(e.target.value)}
             />
 
             <Text style={styles.label}>E-mail: </Text>
@@ -52,8 +55,7 @@ const Registro = () => {
                 style={styles.input}
                 placeholder="Insira seu e-mail."
                 value={email}
-                onChange={(e) => setemail(e.target.value)}
-
+                onChange={(e) => setEmail(e.target.value)}
                 keyboardType="email-address"
             />
 
@@ -61,7 +63,7 @@ const Registro = () => {
             <TextInput 
                 style={styles.input}
                 placeholder="Insira sua senha."
-                onChange={(e) => setsenha(e.target.value)}
+                onChange={(e) => setSenha(e.target.value)}
             />
 
             <Text style={styles.label}>Confirme sua senha: </Text>

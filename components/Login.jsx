@@ -3,12 +3,9 @@ import { StyleSheet, TextInput, View, Pressable, Text } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 
-
-
-
 const Login = () => {
-    const[email,setemail]=useState('');
-    const [senha,setsenha]=useState('');
+    const[email, setEmail]=useState('');
+    const [senha, setSenha]=useState('');
 
     const navigation = useNavigation()
     async function logi (){
@@ -34,14 +31,14 @@ const Login = () => {
 
             <Text style={styles.label}>E-mail: </Text>
             <TextInput
-                onChange={(e) => setemail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value)}
                 style={styles.input}
                 placeholder="Insira seu e-mail."
             />
 
             <Text style={styles.label}>Senha: </Text>
             <TextInput 
-                onChange={(e) => setsenha(e.target.value)}
+                onChange={(e) => setSenha(e.target.value)}
                 style={styles.input}
                 placeholder="Insira sua senha."
             />
@@ -52,50 +49,11 @@ const Login = () => {
                 </Pressable>
            
 
-           
                 <Pressable style={[styles.button, styles.registerButton]} onPress={() => navigation.navigate("Register")}>
                     <Text style={[styles.buttonText, styles.registerButtonText]}>Registrar</Text>
                 </Pressable>
-           
-
-                <Text style={styles.label} accessibilityLabel="Insira seu e-mail">E-mail:</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Insira seu e-mail."
-                />
-                
-                <Text style={styles.label} accessibilityLabel="Insira sua senha de usuário">Senha:</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Insira sua senha."
-                    secureTextEntry={true}
-                />
-            </View>
-
-            {/* Centralizando os botões "Entrar" e "Registrar" */}
-            <View style={styles.buttonContainer}>
-                <Pressable style={styles.button}>
-                    <Text style={styles.buttonText}>Entrar</Text>
-                </Pressable>
-
-                <Pressable style={[styles.button, styles.registerButton]}>
-                    <Text style={[styles.buttonText, styles.registerButtonText]}>Registrar</Text>
-                </Pressable>
-            </View>
-
-
-            <Text style={styles.orText} accessibilityLabel="Entrar em sua conta com">Entrar com:</Text>
-
-            <View style={styles.socialContainer}>
-                <Pressable style={styles.socialButton}>
-                    <Text style={styles.socialText}>Google</Text>
-                </Pressable>
-
-                <Pressable style={styles.socialButton}>
-                    <Text style={styles.socialText}>Facebook</Text>
-                </Pressable>
-            </View>
         </View>
+    </View>
     );
 };
 
