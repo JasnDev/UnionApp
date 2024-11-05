@@ -7,7 +7,7 @@ export default function HomePage() {
   return (
     <View>
       <View>
-        <Header />
+        <Header/>
         <Topicos />
       </View>
       <View style={styles.container}>

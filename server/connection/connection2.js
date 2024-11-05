@@ -11,8 +11,8 @@ const connect = mongoose.connection;
 
 const audio = connect.model("audio", {
     uri:{type:String},
-    time:{type:String},
-    quemfez:{type:String}
+    
+    
 })
 
-export {audio}
+export default audio

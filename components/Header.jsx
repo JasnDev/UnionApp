@@ -1,6 +1,6 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { View, StyleSheet, Pressable } from 'react-native';
+import { View, StyleSheet, Pressable,Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 const Header = () => {
@@ -14,11 +14,11 @@ const Header = () => {
                     <FontAwesome name="user-o" size={24} color="#000" />
                 </Pressable>
 
-                <Pressable style={styles.iconCenter}>
+                <Pressable style={styles.iconCenter} onPress={() => navigation.navigate('post')}>
                     <AntDesign name="pluscircleo" size={35} color="#000" />
                 </Pressable>
                 <Pressable style={styles.iconCenter} onPress={() => localStorage.clear()}>
-                      sair
+                      <Text> Sair </Text>
                 </Pressable>
                 
         </View>
