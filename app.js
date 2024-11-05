@@ -3,14 +3,10 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomePage from './pages/home';
 import LoginPage from './pages/login';
 import RegistroPage from './pages/registro';
-<<<<<<< HEAD
 import Postpage from './pages/post';
-const Stack=createNativeStackNavigator()
-=======
 
 const Stack = createNativeStackNavigator();
 
->>>>>>> 53076ecc69a3cf41d289552788b357d668ea9926
 export default function App() {
   return (
     <NavigationContainer>
