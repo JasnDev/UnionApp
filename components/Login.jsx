@@ -1,25 +1,33 @@
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet, TextInput, View, Pressable, Text } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
 
 const Login = () => {
+    const[email, setEmail]=useState('');
+    const [senha, setSenha]=useState('');
+
+    const navigation = useNavigation()
+    async function logi (){
+        await axios.post('http://localhost:3030/login',{
+             email:email,
+             senha:senha
+             
+         },{
+            headers: {'Content-Type': 'application/json'}
+         }).then(async(response)=>{
+            localStorage.setItem('Authorization-token',response.data.jwt)
+            console.log("deu certo")
+            navigation.navigate('Home')
+         }).catch((error) => {
+            console.log(error)
+         })
+     }
     return (
         <View style={styles.mainContainer} accessible={true} accessibilityLabel="Tela de Login do usuário">
             <View style={styles.container}>
                 <Text style={styles.title}>Sign-in</Text>
 
-                <Text style={styles.label} accessibilityLabel="Insira seu e-mail">E-mail:</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Insira seu e-mail."
-                />
-                
-                <Text style={styles.label} accessibilityLabel="Insira sua senha de usuário">Senha:</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Insira sua senha."
-                    secureTextEntry={true}
-                />
-            </View>
 
             <View style={styles.buttonContainer}>
                 <Pressable style={styles.button}>
@@ -47,6 +55,7 @@ const Login = () => {
                 </Pressable>
             </View>
         </View>
+    </View>
     );
 };
 
