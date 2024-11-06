@@ -78,12 +78,6 @@ const Registro = () => {
             <Pressable style={styles.button} accessibilityLabel="botão para confirmar o registro" onPress={regi}> 
                 <Text style={styles.buttonText}>Confirme</Text>
             </Pressable>
-            <View style={styles.loginContainer}>
-                <Text style={styles.loginText}>Não tem uma conta? </Text>
-                <Pressable style={ styles.buttonLogin}>
-                    <Text style={styles.buttonText}>Registrar</Text>
-                </Pressable>
-            </View>
         </View>
     );
 };

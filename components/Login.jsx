@@ -4,16 +4,16 @@ import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 
 const Login = () => {
-    const[email, setEmail]=useState('');
-    const [senha, setSenha]=useState('');
+    const [email, setEmail] = useState('');
+    const [senha, setSenha] = useState('');
 
     const navigation = useNavigation()
-    async function logi (){
+
+    async function loginSaveDates (){
         await axios.post('http://localhost:3030/login',{
              email:email,
              senha:senha
-             
-         },{
+        },{
             headers: {'Content-Type': 'application/json'}
          }).then(async(response)=>{
             localStorage.setItem('Authorization-token',response.data.jwt)
@@ -21,17 +21,31 @@ const Login = () => {
             navigation.navigate('Home')
          }).catch((error) => {
             console.log(error)
-         })
-     }
+         });
+     };
+
     return (
         <View style={styles.mainContainer} accessible={true} accessibilityLabel="Tela de Login do usuário">
             <View style={styles.container}>
                 <Text style={styles.title}>Sign-in</Text>
 
+                <Text style={styles.label}>E-mail: </Text>
+                <TextInput
+                onChange={(e) => setEmail(e.target.value)}
+                style={styles.input}
+                placeholder="Insira seu e-mail."
+                />
+
+                <Text style={styles.label}>Senha: </Text>
+                <TextInput 
+                onChange={(e) => setSenha(e.target.value)}
+                style={styles.input}
+                placeholder="Insira sua senha."
+                />
 
             <View style={styles.buttonContainer}>
                 <Pressable style={styles.button}>
-                    <Text style={styles.buttonText}>Entrar</Text>
+                    <Text style={styles.buttonText} onPress={loginSaveDates}>Entrar</Text>
                 </Pressable>
             </View>
 
@@ -50,7 +64,7 @@ const Login = () => {
             {/* Seção de Registrar, fixada no rodapé */}
             <View style={styles.registerContainer}>
                 <Text style={styles.registerText}>Não tem uma conta? </Text>
-                <Pressable style={ styles.registerButton}>
+                <Pressable style={ styles.registerButton} onPress={() => navigation.navigate("Register")}>
                     <Text style={styles.buttonText}>Registrar</Text>
                 </Pressable>
             </View>
