@@ -88,6 +88,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         paddingHorizontal: 20,
+        width: '100%',
     },
     title: {
         fontSize: 30,
@@ -101,9 +102,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20, // Mantendo um leve padding horizontal
         fontSize: 16,
         backgroundColor: '#fff',
-        borderColor: '#a0a0a0', // Cor da borda
+        borderColor: '#556639',
         borderWidth: 1.5, // Largura da borda para que seja visível
-        borderRadius: 15, // Bordas arredondadas
+        borderRadius: 10, // Bordas arredondadas
         marginBottom: 20, // Menor espaço entre os inputs
         color: '#333',
         
@@ -111,12 +112,13 @@ const styles = StyleSheet.create({
     button: {
         width: '50%', // Reduzindo a largura do botão para se ajustar ao centro
         padding: 14,
-        backgroundColor: '#86A15A', // Cor verde suave
-        borderRadius: 15,
+        backgroundColor: '#75943E', // Cor verde suave
+        borderRadius: 10,
         alignItems: 'center',
         justifyContent: 'center',
         marginTop: 20,
         marginBottom: 20,
+     
     },
     buttonText: {
         fontSize: 18,

@@ -61,13 +61,14 @@ const Login = () => {
                 </Pressable>
             </View>
 
-            {/* Seção de Registrar, fixada no rodapé */}
+            {/* Seção de Registrar, fixada no rodapé  */}
             <View style={styles.registerContainer}>
                 <Text style={styles.registerText}>Não tem uma conta? </Text>
                 <Pressable style={ styles.registerButton} onPress={() => navigation.navigate("Register")}>
-                    <Text style={styles.buttonText}>Registrar</Text>
+                    <Text style={styles.buttonresgisterText}>Registrar</Text>
                 </Pressable>
             </View>
+           
         </View>
     </View>
     );
@@ -80,16 +81,17 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         paddingHorizontal: 20,
         backgroundColor: '#E7F1D6',
+        width: '100%',
     },
     container: {
-        width: '100%',
+       
         alignItems: 'center',
     },
     title: {
         fontSize: 30,
         fontWeight: 'bold',
         color: '#000000',
-        marginBottom: 20,
+        marginBottom: 35,
         textAlign: 'center',
     },
     label: {
@@ -97,15 +99,15 @@ const styles = StyleSheet.create({
         color: '#2F4F4F',
         marginBottom: 8,
         alignSelf: 'flex-start',
-        paddingLeft: 55,
+        paddingLeft: 35,
     },
     input: {
-        width: '70%',
-        paddingVertical: 15,
-        paddingHorizontal: 15,
+        width: '100%',
+        paddingVertical: 18,
+        paddingHorizontal: 40,
         fontSize: 16,
         backgroundColor: '#fff',
-        borderColor: '#8FBC8F',
+        borderColor: '#556639',
         borderWidth: 1.5,
         borderRadius: 10,
         marginBottom: 30,
@@ -113,17 +115,18 @@ const styles = StyleSheet.create({
     },
     buttonContainer: {
         flexDirection: 'row',
-        justifyContent: 'center',
         width: '100%',
         marginBottom: 25,
+
     },
     button: {
         padding: 35,
         backgroundColor: '#75943E',
-        borderRadius: 8,
+        borderRadius: 10,
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: 15,
+      
     },
     buttonText: {
         fontSize: 16,
@@ -159,24 +162,29 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     registerContainer: {
-        position: 'absolute',
-        bottom: 20,
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 35,
     },
     registerText: {
         fontSize: 16,
         color: '#2F4F4F',
+        padding: 10,
+    },
+    buttonresgisterText: {
+        fontSize: 16,
+        color: '#fff',
+        fontWeight: 'bold',
     },
     registerButton: {
-        marginLeft: 10,
-        paddingHorizontal: 20,  // Largura personalizada para ficar mais como um botão
-        padding: 10,
-        backgroundColor: '#313B22',
+        padding: 20,
+        backgroundColor: '#75943E',
         borderRadius: 8,
         alignItems: 'center',
         justifyContent: 'center',
-    },
+        paddingVertical: 15,
+    }
 });
 
 export default Login;
