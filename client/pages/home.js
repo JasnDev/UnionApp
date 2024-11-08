@@ -2,6 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import Header from '../components/Header';
 import Topicos from '../components/Topicos';
+import Feed from '../components/Feed';
 
 export default function HomePage() {
   return (
@@ -11,7 +12,7 @@ export default function HomePage() {
         <Topicos />
       </View>
       <View style={styles.container}>
-        <Text>Open up App.js to start working on your app!</Text>
+        <Feed />
         <StatusBar style="auto" />
       </View>
     </View>
