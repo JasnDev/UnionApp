@@ -1,4 +1,4 @@
-import express from 'express'
+import Express from 'express'
 import dotenv from 'dotenv'
 import  regis  from './major/register.js'
 import cors from 'cors'
@@ -8,23 +8,24 @@ import Audio from './major/audiopost.js'
 import getall from './major/getaudio.js'
 
 
-let app = express()
+let app = Express();
+const port=process.env.PORT;
 
-dotenv.config()
+app.use(Express.json());
+app.use(cors());
+dotenv.config();
 
-const port=process.env.PORT
 
-app.use(express.json())
-app.use(cors())
+
+
 
 app.get('/', GetAll)
 app.get('/aud',getall)
-
 app.post('/registro',regis)
 app.post('/login',login)
 app.post('/auio', Audio)
 
 app.listen(port, ()=>{
-    console.log("Eu não quero ao mal")
+    console.log(`Servidor Rodando na Porta ${port}`)
 
 })

@@ -10,7 +10,11 @@ const PostagemAudio = () => {
   const [sound, setSound] = useState();
   const [isPlaying, setIsPlaying] = useState(false);
   const [fileUrl, setFileUrl] = useState(false);
-
+  
+  
+  let num;
+  num=Math.random()*100
+  
   const startRecording = async () => {
     try {
       const { recording } = await Audio.Recording.createAsync(
@@ -27,18 +31,19 @@ const PostagemAudio = () => {
       await recording.stopAndUnloadAsync();
       const uri = recording.getURI();
       setRecordingUri(uri);
-      const fileUri = await FileSystem.documentDirectory + 'audio_file.m4a';
+      const fileUri = await FileSystem.documentDirectory + `audio_file${num}.m4a`;
       await FileSystem.copyAsync({ from: uri, to: fileUri });
       setFileUrl(fileUri)
       console.log('Áudio salvo em:', fileUri);
+      console.log(recording)
     } catch (error) {
       console.error('Erro ao parar a gravação:', error);
     };
   };
 
-  const audioFilePath = FileSystem.documentDirectory + 'audio_file.m4a';
+  const audioFilePath = fileUrl ;
   async function salvar() {
-    await axios.post('http://10.145.45.50:3030/auio', {
+    await axios.post('http://10.145.45.33:3030/auio', {
       uri: fileUrl
     });
   };
@@ -107,7 +112,7 @@ const PostagemAudio = () => {
       <Pressable onPressIn={startRecording} onPressOut={stopRecording} >
         <Text>GRAVAR</Text>
       </Pressable>
-      <Pressable onPress={salvar} >
+      <Pressable onPress={salvar} style={{marginTop:10}} >
         <Text>Salvar</Text>
       </Pressable>
     </View>

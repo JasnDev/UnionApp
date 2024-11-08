@@ -1,8 +1,8 @@
 import React, {useState} from "react";
-import { StyleSheet, TextInput, View, Pressable, Text } from "react-native";
+import { StyleSheet, TextInput, View, Pressable, Text, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import axios from 'axios'
-
+import * as Crypto from 'expo-crypto';
 const Registro = () => {
     const [email, setEmail] = useState('');
     const [error, setError] = useState('');
@@ -12,14 +12,39 @@ const Registro = () => {
 
     const navigation = useNavigation();
 
-    async function regi (){
-       await axios.post('http://10.145.45.50:3030/registro',{
-            nome:nome,
-            email:email,
-            senha:senha
-        }).then(() => {navigation.navigate("Login")}).catch((error) => {
-            console.log(error)
-        })
+
+    async function regi() {
+        
+        hashPassword(senha).then((hashedPassword) => {
+            if (hashedPassword) {
+                axios.post('http://10.145.45.33:3030/registro', {
+                    nome: nome,
+                    email: email,
+                    senha: hashedPassword  
+                }).then(() => {
+                    navigation.navigate("Login");
+                    Alert.alert("REGISTRADO")
+                }).catch((error) => {
+                    Alert.alert("Email já cadastrado")
+                    console.log(error);
+                });
+            } else {
+                setError('Erro ao gerar o hash da senha');
+            }
+        });
+    }
+    const hashPassword = async (senha) => {
+        try {
+            // Gerando o hash da senha usando SHA-256
+            const hashedPassword = await Crypto.digestStringAsync(
+                Crypto.CryptoDigestAlgorithm.SHA256,
+                senha
+            );
+            return hashedPassword;
+        } catch (error) {
+            console.error('Erro ao gerar o hash da senha', error);
+            return null;
+        }
     };
 
     const emailRegex = /^\S+@\S+\.\S+$/;
@@ -45,21 +70,21 @@ const Registro = () => {
             <TextInput
                 style={styles.input}
                 placeholder="Insira o nome de usuário."
-                onChange={(e) => setNome(e.target.value)}
+                onChangeText={(text) => setNome(text)}
             />
 
             <TextInput
                 style={styles.input}
                 placeholder="E-mail"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChangeText={(text) => setEmail(text)}
                 keyboardType="email-address"
             />
 
             <TextInput
                 style={styles.input}
                 placeholder="Insira sua senha."
-                onChange={(e) => setSenha(e.target.value)}
+                onChangeText={(text) => setSenha(text)}
             />
 
             <TextInput

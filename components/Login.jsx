@@ -1,28 +1,55 @@
 import React, { useState } from "react";
-import { StyleSheet, TextInput, View, Pressable, Text } from "react-native";
+import { StyleSheet, TextInput, View, Pressable, Text, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
-
+import * as Crypto from 'expo-crypto';
+import { AppContext } from '../contexts/context.js';
+import { useContext } from "react";
 const Login = () => {
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
+    const [token, SetToken] = useContext(AppContext);
+    const navigation = useNavigation();
 
-    const navigation = useNavigation()
 
-    async function loginSaveDates (){
-        await axios.post('http://localhost:3030/login',{
-             email:email,
-             senha:senha
-        },{
-            headers: {'Content-Type': 'application/json'}
-         }).then(async(response)=>{
-            localStorage.setItem('Authorization-token',response.data.jwt)
-            console.log("deu certo")
-            navigation.navigate('Home')
-         }).catch((error) => {
-            console.log(error)
-         });
-     };
+    const hashPassword = async (senha) => {
+        try {
+            
+            const hashedPassword = await Crypto.digestStringAsync(
+                Crypto.CryptoDigestAlgorithm.SHA256,
+                senha
+            );
+            return hashedPassword;
+        } catch (error) {
+            console.error('Erro ao gerar o hash da senha', error);
+            return null;
+        }
+    };
+
+    function loginSaveDates() {
+        
+        hashPassword(senha).then((hashedPassword) => {
+            if (hashedPassword) {
+                axios.post('http://10.145.45.33:3030/login', {
+                    email: email,
+                    senha: hashedPassword  
+                },{
+                    headers: {'Content-Type': 'application/json'}
+                 }).then((response) => {
+                    SetToken(`Authorization-token ${response.data.jwt}`)
+                    navigation.navigate("Home");
+                    Alert.alert("LOGADO")
+                }).catch((error) => {
+                    console.log(error);
+                    console.log("erro")
+                    Alert.alert("ERRO EMAIL OU SENHA INCORRETOS")
+                });
+            } else {
+                setError('Erro ao gerar o hash da senha');
+            }
+        });
+    }
+    
 
     return (
         <View style={styles.mainContainer} accessible={true} accessibilityLabel="Tela de Login do usuário">
@@ -31,14 +58,14 @@ const Login = () => {
 
                 <Text style={styles.label}>E-mail: </Text>
                 <TextInput
-                onChange={(e) => setEmail(e.target.value)}
+                onChangeText={(text) => setEmail(text)}
                 style={styles.input}
                 placeholder="Insira seu e-mail."
                 />
 
                 <Text style={styles.label}>Senha: </Text>
                 <TextInput 
-                onChange={(e) => setSenha(e.target.value)}
+                onChangeText={(text) => setSenha(text)}
                 style={styles.input}
                 placeholder="Insira sua senha."
                 />

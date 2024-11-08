@@ -10,7 +10,8 @@ mongoose.connect(adress)
 const connect = mongoose.connection;
 
 const audio = connect.model("audio", {
-    uri:{type:String},
+    recording:{type:String},
+    uri:{type:String}
     
     
 })
