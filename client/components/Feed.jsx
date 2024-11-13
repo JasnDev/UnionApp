@@ -5,111 +5,85 @@ import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
 
 const Feed = () => {
-  const [audios, setAudios] = useState([]); // Lista de URIs dos áudios
-  const [sounds, setSounds] = useState([]); // Estado para armazenar instâncias de áudio
-  const [duracao, setDuracao] = useState([]); // Duração de cada áudio
-  const [playingIndex, setPlayingIndex] = useState(null); // Índice do áudio que está tocando
+  const [audios, setAudios] = useState([]);
+  const [currentSound, setCurrentSound] = useState(null);
+  const [playingIndex, setPlayingIndex] = useState(null);
 
   useEffect(() => {
-    // Fetch de áudios da API
     axios
-      .get('http://10.145.44.63:3030/aud')
+      .get('http://10.0.0.225:3030/audios')  // Chama a API para obter todos os áudios
       .then((response) => {
-        const audioUris = response.data.map((item) => item.uri);
-        setAudios(audioUris);
+        const audioData = response.data.map((item, index) => ({
+          id: index.toString(),
+          filename: item.filename,
+          url: item.url,  // Agora a URL completa é retornada
+        }));
+        setAudios(audioData);
       })
       .catch((error) => {
         console.error('Erro ao buscar os áudios:', error);
       });
   }, []);
 
-  // Função para tocar o áudio
-  async function AudioPlay(audiouri, index) {
-    if (!audiouri) {
-      console.log('URI não encontrada');
-      return;
+  const AudioPlay = async (audiouri, index) => {
+    if (currentSound) {
+      await currentSound.stopAsync();
+      await currentSound.unloadAsync();
     }
 
     try {
-      // Cria o som e inicializa
-      const { sound } = await Audio.Sound.createAsync({ uri: audiouri });
-      await sound.setPositionAsync(0); // Inicia o áudio no início
-      await sound.playAsync(); // Toca o áudio
-
-      // Armazena a instância de áudio para controle futuro
-      setSounds((prevSounds) => {
-        const newSounds = [...prevSounds];
-        newSounds[index] = sound;
-        return newSounds;
-      });
-
-      // Atualiza o índice do áudio tocando
+      const { sound, status } = await Audio.Sound.createAsync(
+        { uri: audiouri },
+        { shouldPlay: true }
+      );
+      setCurrentSound(sound);
       setPlayingIndex(index);
 
-      // Obtém a duração do áudio
-      const status = await sound.getStatusAsync();
-      setDuracao((prevDuracao) => {
-        const newDuracao = [...prevDuracao];
-        newDuracao[index] = status.durationMillis;
-        return newDuracao;
-      });
-
-      // Monitora a atualização do progresso do áudio
       sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.isLoaded) {
-          const currentPosition = status.positionMillis;
-          const duration = status.durationMillis;
-          if (currentPosition === duration) {
-            setPlayingIndex(null); // Quando o áudio termina, limpa o índice de reprodução
-          }
+        if (status.didJustFinish) {
+          setPlayingIndex(null);
+          setCurrentSound(null);
         }
       });
     } catch (error) {
-      console.log(error);
+      console.error('Erro ao reproduzir o áudio:', error);
     }
-  }
+  };
 
-  // Função para pausar o áudio
-  async function pauseAudio(index) {
-    const sound = sounds[index];
-    if (sound) {
-      await sound.pauseAsync();
-      setPlayingIndex(null); // Pausa o áudio
+  const pauseAudio = async () => {
+    if (currentSound) {
+      await currentSound.pauseAsync();
+      setPlayingIndex(null);
     }
-  }
+  };
 
   return (
     <SafeAreaView>
       <FlatList
         data={audios}
-        renderItem={({ item, index }) => {
-          const currentDuration = duracao[index] || 0; // Duração do áudio, se disponível
-          const durationInSeconds = (currentDuration / 1000).toFixed(2); // Converte para segundos
-          const progress = (currentDuration > 0 ? (currentDuration / duracao[index]) * 100 : 0) // Cálculo do progresso da barra
-
-          return (
-            <View style={styles.container}>
-              <Pressable
-                onPress={() =>
-                  playingIndex === index ? pauseAudio(index) : AudioPlay(item, index)
-                }
-                style={styles.playButton}
-              >
-                <Ionicons size={30} color="#FFF" name={playingIndex === index ? 'pause' : 'play'} />
-              </Pressable>
-
-              <View style={styles.progressBar}>
-                <View style={[styles.progress, { width: `${progress}%` }]} />
-              </View>
-
-              <Text style={styles.time}>{durationInSeconds}s</Text>
-            </View>
-          );
-        }}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item, index }) => (
+          <View style={styles.container}>
+            <Pressable
+              onPress={() =>
+                playingIndex === index ? pauseAudio() : AudioPlay(item.url, index)
+              }
+              style={styles.playButton}
+            >
+              <Ionicons
+                size={30}
+                color="#FFF"
+                name={playingIndex === index ? 'pause' : 'play'}
+              />
+            </Pressable>
+            <Text style={styles.filename}>{item.filename}</Text>
+          </View>
+        )}
       />
     </SafeAreaView>
   );
 };
+
 
 export default Feed;
 
@@ -128,20 +102,9 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     marginRight: 15,
   },
-  progressBar: {
-    flex: 1,
-    height: 5,
-    backgroundColor: '#777',
-    borderRadius: 5,
-    overflow: 'hidden',
-    marginRight: 10,
-  },
-  progress: {
-    height: '100%',
-    backgroundColor: '#1DB954',
-  },
-  time: {
+  filename: {
     color: '#FFF',
-    fontSize: 12,
+    fontSize: 14,
+    flex: 1,
   },
 });

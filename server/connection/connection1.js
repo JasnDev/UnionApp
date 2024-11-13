@@ -1,18 +1,16 @@
-import mongoose from "mongoose";
-import dotenv from 'dotenv'
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 
-dotenv.config()
+dotenv.config();
 
-const adress = process.env.ip
+const address = process.env.IP;
 
-mongoose.connect(adress)
-
-const connect = mongoose.connection;
-
-const registro = connect.model("registro", {
-    nome:{type:String},
-    email:{type:String},
-    senha:{type:String}
+mongoose.connect(address, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
 })
+  .then(() => console.log('Conectado ao MongoDB com sucesso'))
+  .catch(err => console.error('Erro ao conectar ao MongoDB:', err));
 
-export default registro
+// Exporte apenas a instância do `mongoose`
+export default mongoose;

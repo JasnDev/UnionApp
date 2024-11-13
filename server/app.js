@@ -1,31 +1,30 @@
-import Express from 'express'
-import dotenv from 'dotenv'
-import  regis  from './major/register.js'
-import cors from 'cors'
-import  login  from './major/entrar.js'
-import GetAll from './major/get.js'
-import Audio from './major/audiopost.js'
-import getall from './major/getaudio.js'
+import express from 'express';
+import dotenv from 'dotenv';
+import cors from 'cors';
+import regis from './major/register.js';
+import login from './major/entrar.js';
+import GetAll from './major/get.js';
+import getAllAudios from './major/getaudio.js';
+import getAudio from './major/getaudiobyname.js';
+import Audio from './major/audiopost.js';
+import upload from './multerConfig.js';
 
-
-let app = Express();
-const port=process.env.PORT;
-
-app.use(Express.json());
-app.use(cors());
 dotenv.config();
 
+const app = express();
+const port = process.env.PORT || 3000;
 
+app.use(cors());
+app.use(express.json());
 
+// Rotas
+app.get('/', GetAll);
+app.get('/audios',getAllAudios)
+app.get('/audio/:filename',getAudio)
+app.post('/registro', regis);
+app.post('/login', login);
+app.post('/upload', upload.single('audio'), Audio);
 
-
-app.get('/', GetAll)
-app.get('/aud',getall)
-app.post('/registro',regis)
-app.post('/login',login)
-app.post('/auio', Audio)
-
-app.listen(port, ()=>{
-    console.log(`Servidor Rodando na Porta ${port}`)
-
-})
+app.listen(port, () => {
+  console.log(`Servidor rodando na porta ${port}`);
+});

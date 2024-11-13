@@ -9,10 +9,10 @@ export default function HomePage() {
     <View>
       <View>
         <Header/>
-        <Topicos />
+        <Feed/>   
       </View>
       <View style={styles.container}>
-        <Feed />
+    
         <StatusBar style="auto" />
       </View>
     </View>

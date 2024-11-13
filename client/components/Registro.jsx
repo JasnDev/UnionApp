@@ -17,15 +17,15 @@ const Registro = () => {
         
         hashPassword(senha).then((hashedPassword) => {
             if (hashedPassword) {
-                axios.post('http://10.145.45.33:3030/registro', {
+                axios.post('http://10.0.0.225:3030/registro', {
                     nome: nome,
                     email: email,
                     senha: hashedPassword  
-                }).then(() => {
+                }).then(async() => {
                     navigation.navigate("Login");
                     Alert.alert("REGISTRADO")
-                }).catch((error) => {
-                    Alert.alert("Email já cadastrado")
+                }).catch(async(error) => {
+                    await Alert.alert("Email já cadastrado")
                     console.log(error);
                 });
             } else {

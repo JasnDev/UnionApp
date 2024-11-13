@@ -1,12 +1,38 @@
-import  audio  from "../connection/connection2.js";
-async function getall(req,res){
+import createGridFSBucket from '../connection/connection2.js';
 
-try {
-    const Find=await audio.find()
-    res.send(Find)
-} catch (error) {
-    console.log(error)
-}
+const getAllAudios = async (req, res) => {
+  try {
+    const bucket = createGridFSBucket();
 
-}
-export default getall
+    // Buscar todos os arquivos no bucket
+    const cursor = bucket.find({});
+
+    // Crie um array para armazenar as informações dos arquivos
+    const audios = [];
+
+    // Itera sobre todos os arquivos encontrados e armazena as informações necessárias
+    await cursor.forEach((file) => {
+      audios.push({
+        filename: file.filename,
+        length: file.length,
+        uploadDate: file.uploadDate,
+        contentType: file.contentType,
+        url: `http://10.0.0.225:3030/audio/${file.filename}`  // Incluindo a URL completa
+      });
+    });
+
+    // Se não encontrar áudios, retorne um erro
+    if (audios.length === 0) {
+      return res.status(404).json({ error: 'Nenhum áudio encontrado' });
+    }
+
+    // Retorne todos os áudios encontrados
+    return res.status(200).json(audios);
+
+  } catch (error) {
+    console.error('Erro ao recuperar arquivos do MongoDB:', error);
+    return res.status(500).json({ error: 'Erro ao recuperar arquivos do MongoDB' });
+  }
+};
+
+export default getAllAudios;

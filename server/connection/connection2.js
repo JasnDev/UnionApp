@@ -1,19 +1,15 @@
-import mongoose from "mongoose";
-import dotenv from 'dotenv'
+// gridFsBucket.js
+import { GridFSBucket } from 'mongodb';
+import  mongoose from './connection1.js'; // Importe a conexão existente
 
-dotenv.config()
+function createGridFSBucket() {
+    const db = mongoose.connection.db; // Obtém a instância do banco de dados conectada
+    const bucket = new GridFSBucket(db, {
+        bucketName: 'myBucket' // Nome do bucket, pode ser alterado conforme necessário
+    });
 
-const adress = process.env.ip
+    console.log('GridFSBucket configurado com sucesso');
+    return bucket;
+}
 
-mongoose.connect(adress)
-
-const connect = mongoose.connection;
-
-const audio = connect.model("audio", {
-    recording:{type:String},
-    uri:{type:String}
-    
-    
-})
-
-export default audio
+export default createGridFSBucket;

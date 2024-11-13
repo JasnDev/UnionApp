@@ -10,7 +10,7 @@ const Header = () => {
     return (
         <View style={styles.headerContainer}>
 
-            {token?<View>
+        <View>
                    
                 <Pressable style={styles.iconCenter} onPress={() => navigation.navigate('post')}>
                     <AntDesign name="pluscircleo" size={35} color="#000" />
@@ -19,12 +19,12 @@ const Header = () => {
                 <Pressable style={styles.iconCenter} onPress={() => SetToken(null)}>
                       <Text> Sair </Text>
                 </Pressable>
-                </View>:
+                </View>
                 <Pressable style={styles.iconCenter} onPress={() => navigation.navigate('Login')}>
                     <FontAwesome name="user-o" size={24} color="#000" />
                 </Pressable>
              
-}
+
         </View>
     );
 };
