@@ -1,20 +1,21 @@
-import React, { useState } from "react";
-import { StyleSheet, TextInput, View, Pressable, Text, Alert } from "react-native";
+import React, { useState, useContext } from "react";
+import { StyleSheet, TextInput, View, Pressable, Text, Alert, ActivityIndicator } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import * as Crypto from 'expo-crypto';
 import { AppContext } from '../contexts/context.js';
-import { useContext } from "react";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 const Login = () => {
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
-    const [token, SetToken] = useContext(AppContext);
+    const [loading, setLoading] = useState(false);  // Para mostrar o carregando
+    const [token, setToken] = useContext(AppContext);
     const navigation = useNavigation();
 
-
+    // Função para gerar o hash da senha usando SHA-256
     const hashPassword = async (senha) => {
         try {
-            
             const hashedPassword = await Crypto.digestStringAsync(
                 Crypto.CryptoDigestAlgorithm.SHA256,
                 senha
@@ -26,30 +27,42 @@ const Login = () => {
         }
     };
 
-    function loginSaveDates() {
+    // Função para fazer login e salvar o token no AsyncStorage
+    const loginSaveDates = async () => {
+        if (!email || !senha) {
+            Alert.alert("Por favor, preencha ambos os campos!");
+            return;
+        }
         
-        hashPassword(senha).then((hashedPassword) => {
+        setLoading(true);
+        try {
+            const hashedPassword = await hashPassword(senha);
             if (hashedPassword) {
-                axios.post('http://10.145.45.33:3030/login', {
+                // Enviar dados para a API
+                const response = await axios.post('http://10.145.45.33:3030/login', {
                     email: email,
                     senha: hashedPassword  
-                },{
-                    headers: {'Content-Type': 'application/json'}
-                 }).then((response) => {
-                    SetToken(`Authorization-token ${response.data.jwt}`)
-                    navigation.navigate("Home");
-                    Alert.alert("LOGADO")
-                }).catch((error) => {
-                    console.log(error);
-                    console.log("erro")
-                    Alert.alert("ERRO EMAIL OU SENHA INCORRETOS")
+                }, {
+                    headers: { 'Content-Type': 'application/json' }
                 });
+
+                // Salvar o token no AsyncStorage
+                await AsyncStorage.setItem('Authorization-token', response.data.token);
+                setToken(response.data.token);  // Atualizar o contexto com o token
+
+                // Redirecionar para a Home
+                navigation.navigate("Home");
+                Alert.alert("LOGADO com sucesso!");
             } else {
-                setError('Erro ao gerar o hash da senha');
+                Alert.alert("Erro ao gerar o hash da senha");
             }
-        });
-    }
-    
+        } catch (error) {
+            console.error("Erro ao fazer login:", error);
+            Alert.alert("Erro", "Email ou senha incorretos!");
+        } finally {
+            setLoading(false);  // Para quando a requisição terminar (sucesso ou erro)
+        }
+    };
 
     return (
         <View style={styles.mainContainer} accessible={true} accessibilityLabel="Tela de Login do usuário">
@@ -58,46 +71,52 @@ const Login = () => {
 
                 <Text style={styles.label}>E-mail: </Text>
                 <TextInput
-                onChangeText={(text) => setEmail(text)}
-                style={styles.input}
-                placeholder="Insira seu e-mail."
+                    onChangeText={(text) => setEmail(text)}
+                    style={styles.input}
+                    placeholder="Insira seu e-mail."
+                    value={email}
                 />
 
                 <Text style={styles.label}>Senha: </Text>
                 <TextInput 
-                onChangeText={(text) => setSenha(text)}
-                style={styles.input}
-                placeholder="Insira sua senha."
+                    onChangeText={(text) => setSenha(text)}
+                    style={styles.input}
+                    placeholder="Insira sua senha."
+                    secureTextEntry
+                    value={senha}
                 />
 
-            <View style={styles.buttonContainer}>
-                <Pressable style={styles.button}>
-                    <Text style={styles.buttonText} onPress={loginSaveDates}>Entrar</Text>
-                </Pressable>
+                <View style={styles.buttonContainer}>
+                    <Pressable style={styles.button} onPress={loginSaveDates} disabled={loading}>
+                        {loading ? (
+                            <ActivityIndicator size="small" color="#fff" />
+                        ) : (
+                            <Text style={styles.buttonText}>Entrar</Text>
+                        )}
+                    </Pressable>
+                </View>
+
+                <Text style={styles.orText} accessibilityLabel="Entrar em sua conta com">Entrar com:</Text>
+
+                <View style={styles.socialContainer}>
+                    <Pressable style={[styles.socialButton, styles.googleButton]}>
+                        <Text style={styles.socialText}>Google</Text>
+                    </Pressable>
+
+                    <Pressable style={[styles.socialButton, styles.facebookButton]}>
+                        <Text style={styles.socialText}>Facebook</Text>
+                    </Pressable>
+                </View>
+
+                {/* Seção de Registrar, fixada no rodapé */}
+                <View style={styles.registerContainer}>
+                    <Text style={styles.registerText}>Não tem uma conta? </Text>
+                    <Pressable style={styles.registerButton} onPress={() => navigation.navigate("Register")}>
+                        <Text style={styles.buttonresgisterText}>Registrar</Text>
+                    </Pressable>
+                </View>
             </View>
-
-            <Text style={styles.orText} accessibilityLabel="Entrar em sua conta com">Entrar com:</Text>
-
-            <View style={styles.socialContainer}>
-                <Pressable style={[styles.socialButton, styles.googleButton]}>
-                    <Text style={styles.socialText}>Google</Text>
-                </Pressable>
-
-                <Pressable style={[styles.socialButton, styles.facebookButton]}>
-                    <Text style={styles.socialText}>Facebook</Text>
-                </Pressable>
-            </View>
-
-            {/* Seção de Registrar, fixada no rodapé  */}
-            <View style={styles.registerContainer}>
-                <Text style={styles.registerText}>Não tem uma conta? </Text>
-                <Pressable style={ styles.registerButton} onPress={() => navigation.navigate("Register")}>
-                    <Text style={styles.buttonresgisterText}>Registrar</Text>
-                </Pressable>
-            </View>
-           
         </View>
-    </View>
     );
 };
 
@@ -111,7 +130,6 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     container: {
-       
         alignItems: 'center',
     },
     title: {
@@ -144,7 +162,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         width: '100%',
         marginBottom: 25,
-
     },
     button: {
         padding: 35,
@@ -153,7 +170,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: 15,
-      
     },
     buttonText: {
         fontSize: 16,
