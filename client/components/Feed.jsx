@@ -67,7 +67,7 @@ const Feed = ({ categoria }) => {
   // Função para iniciar a animação de onda
   const startWaveAnimation = () => {
     Animated.loop(
-      Animated.sequence([ 
+      Animated.sequence([
         Animated.timing(waveAnimation, {
           toValue: 1,
           duration: 500,
@@ -155,7 +155,7 @@ const Feed = ({ categoria }) => {
           index,
         })}
       />
-      
+
       <View style={styles.navigationContainer}>
         <TouchableOpacity onPress={scrollToPreviousAudio} disabled={playingIndex === 0}>
           <Ionicons name="arrow-back-circle" size={40} color="#FFF" />

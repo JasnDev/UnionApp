@@ -1,11 +1,11 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
-import Registro from '../components/Registro';
+import Register from '../components/Register';
 
 export default function RegistroPage() {
   return (
     <View style={styles.container}>
-      <Registro />
+      <Register />
       <StatusBar style="auto" />
     </View>
   );

@@ -3,15 +3,15 @@ import { StyleSheet, TextInput, View, Pressable, Text, Alert } from "react-nativ
 import { useNavigation } from "@react-navigation/native";
 import axios from 'axios'
 import * as Crypto from 'expo-crypto';
-const Registro = () => {
+
+
+const Register = () => {
     const [email, setEmail] = useState('');
     const [error, setError] = useState('');
     const [senha, setSenha] = useState('');
     const [nome,setNome] = useState('');
     
-
     const navigation = useNavigation();
-
 
     async function regi() {
         
@@ -23,7 +23,7 @@ const Registro = () => {
                     senha: hashedPassword  
                 }).then(async() => {
                     navigation.navigate("Login");
-                    Alert.alert("REGISTRADO")
+                    Alert.alert("Registrado")
                 }).catch(async(error) => {
                     await Alert.alert("Email já cadastrado")
                     console.log(error);
@@ -44,22 +44,6 @@ const Registro = () => {
         } catch (error) {
             console.error('Erro ao gerar o hash da senha', error);
             return null;
-        }
-    };
-
-    const emailRegex = /^\S+@\S+\.\S+$/;
-
-    const validacaoDados = () => {
-        if (!emailRegex.test(email)) {
-            setError('Email inválido.');
-            return false;
-        }
-        if (senha.length < 6) {
-            setError('A senha deve ter pelo menos 6 caracteres.');
-            return false;
-        } else {
-            setError('');
-            return true;
         }
     };
 
@@ -106,6 +90,7 @@ const Registro = () => {
         </View>
     );
 };
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -177,4 +162,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default Registro;
+export default Register;

@@ -1,17 +1,17 @@
-import axios from 'axios';
 import { Audio } from 'expo-av';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 import * as FileSystem from 'expo-file-system';
 import React, { useEffect, useState } from 'react';
 import { Button, Pressable, Text, View, StyleSheet } from 'react-native';
 
-const PostagemAudio = () => {
+const AudioPost = () => {
   const [recording, setRecording] = useState(null);
   const [recordingUri, setRecordingUri] = useState(null);
   const [sound, setSound] = useState();
   const [isPlaying, setIsPlaying] = useState(false);
-  const [fileUrl, setFileUrl] = useState(null); // Corrigido de false para null para tratar o estado adequadamente
+  const [fileUrl, setFileUrl] = useState(null); 
   
-  const num = Math.random() * 100; // Número aleatório para nome único de arquivo
+  const num = Math.random() * 100; 
   
   // Função para iniciar a gravação
   const startRecording = async () => {
@@ -40,7 +40,7 @@ const PostagemAudio = () => {
     }
   };
 
-  const salvar = async () => {
+  const save = async () => {
     const fileUri = fileUrl;
     const file = {
       uri: fileUri,
@@ -118,7 +118,7 @@ const PostagemAudio = () => {
   }, [sound]);
 
   return (
-    <View style={{ padding: 20 }}>
+    <View accessible={true} accessibilityLabel='Página para criação de áudios.'>
       <Text>Reproduzindo Áudio Localmente</Text>
       {recordingUri && (
         <>
@@ -130,18 +130,17 @@ const PostagemAudio = () => {
         </>
       )}
       {!recordingUri && <Text>Sem áudio gravado para reproduzir.</Text>}
-      <Pressable onPressIn={startRecording} onPressOut={stopRecording}>
-        <Text>GRAVAR</Text>
+      <Pressable onPressIn={startRecording} onPressOut={stopRecording} >
+      <FontAwesome accessibilityLabel='Gravar' name="microphone" size={60} color='black'/>
       </Pressable>
-      <Pressable onPress={salvar} style={{ marginTop: 10 }}>
-        <Text>Salvar</Text>
+      <Pressable onPress={save} >
+        <Text>Postar o áudio.</Text>
       </Pressable>
     </View>
   );
 };
 
-export default PostagemAudio;
+export default AudioPost;
 
 const styles = StyleSheet.create({
-  // Estilos podem ser adicionados aqui
 });
