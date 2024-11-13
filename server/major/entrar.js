@@ -8,7 +8,7 @@ const login = async (req, res) => {
   try {
     const verifyEmail = await registro.findOne({ email: req.body.email });
     if (verifyEmail) {
-      const passwordMatch = req.body.senha === verifyEmail.senha; // Para produção, use bcrypt.compare()
+      const passwordMatch = req.body.senha === verifyEmail.senha; 
       if (passwordMatch) {
         const token = Jwt.sign({ _id: verifyEmail._id }, process.env.segredo);
         return res.status(200).send({ message: 'Authorization-token', token });
