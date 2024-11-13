@@ -4,7 +4,7 @@ import { useNavigation } from "@react-navigation/native";
 import axios from 'axios';
 import * as Crypto from 'expo-crypto';
 
-const Registro = () => {
+const Register = () => {
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
     const [confirmarSenha, setConfirmarSenha] = useState('');
@@ -168,4 +168,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default Registro;
+export default Register;

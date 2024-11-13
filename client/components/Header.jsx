@@ -31,7 +31,8 @@ const Header = () => {
     const handleLogout = async () => {
         try {
             await AsyncStorage.removeItem('Authorization-token');
-            setToken(null);  // Atualiza o contexto removendo o token  // Redireciona para a tela de Login
+            setToken(null);  // Atualiza o contexto removendo o token
+            navigation.navigate('Login');  // Redireciona para a tela de Login
         } catch (error) {
             console.log("Erro ao limpar o token:", error);
         }
@@ -52,11 +53,7 @@ const Header = () => {
             </View>
                
             ) : (
-                <View style={styles.iconCenter}>
-                    <Pressable style={styles.iconCenter} onPress={() => navigation.navigate('Login')}>
-                        <FontAwesome name="user-o" size={24} color="#000" />
-                    </Pressable>
-                </View>
+               
             )}
         </View>
     );
