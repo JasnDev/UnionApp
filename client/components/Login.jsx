@@ -30,7 +30,7 @@ const Login = () => {
         
         hashPassword(senha).then((hashedPassword) => {
             if (hashedPassword) {
-                axios.post('http://10.0.0.225:3030/login', {
+                axios.post('http://10.145.45.33:3030/login', {
                     email: email,
                     senha: hashedPassword  
                 },{

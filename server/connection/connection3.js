@@ -1,30 +1,10 @@
-import mongoose from 'mongoose';
+import  mongoose from './connection1.js';
 
-// Define o esquema de um usuário
-const userSchema = new mongoose.Schema({
-  nome: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true, // Impede duplicidade de emails
-    trim: true,
-    lowercase: true,
-  },
-  senha: {
-    type: String,
-    required: true,
-  },
-  dataCriacao: {
-    type: Date,
-    default: Date.now,
-  },
+
+const registro =  mongoose.connection.model("registro",{
+  nome:{type:String},
+  email:{type:String},
+  senha:{type:String}
 });
 
-// Cria o modelo de Usuário
-const registro = mongoose.model('User', userSchema);
-
-export default registro;
+export default registro

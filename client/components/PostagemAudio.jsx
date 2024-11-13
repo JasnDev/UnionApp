@@ -52,7 +52,7 @@ const PostagemAudio = () => {
     formData.append('audio', file);
   
     try {
-      const response = await fetch('http://10.0.0.225:3030/upload', {
+      const response = await fetch('http://10.145.45.33:3030/upload', {
         method: 'POST',
         headers: {
           'Content-Type': 'multipart/form-data'

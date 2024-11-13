@@ -14,7 +14,7 @@ const Feed = ({ categoria }) => {
 
   useEffect(() => {
     axios
-      .get(`http://10.0.0.225:3030/audios?categoria=${categoria}`)
+      .get(`http://10.145.45.33:3030/audios?categoria=${categoria}`)
       .then((response) => {
         const audioData = response.data.map((item, index) => ({
           id: index.toString(),
@@ -30,8 +30,8 @@ const Feed = ({ categoria }) => {
 
   const AudioPlay = async (audiouri, index) => {
     if (currentSound) {
-      await currentSound.stopAsync();
-      await currentSound.unloadAsync();
+      await currentSound.stopAsync(); // Pausa o áudio atual
+      await currentSound.unloadAsync(); // Limpa o áudio
     }
 
     try {
@@ -53,6 +53,14 @@ const Feed = ({ categoria }) => {
       });
     } catch (error) {
       console.error('Erro ao reproduzir o áudio:', error);
+    }
+  };
+
+  const AudioPause = async () => {
+    if (currentSound) {
+      await currentSound.pauseAsync(); // Pausa o áudio
+      setPlayingIndex(null); // Atualiza o índice para indicar que não está mais tocando
+      setPlaybackStatus(null); // Limpa o status de reprodução
     }
   };
 
@@ -101,19 +109,16 @@ const Feed = ({ categoria }) => {
             {/* Animação de onda */}
             {playingIndex === index && playbackStatus && playbackStatus.isPlaying ? (
               <Animated.View
-                style={[
-                  styles.waveContainer,
-                  {
-                    transform: [
-                      {
-                        scaleY: waveAnimation.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [1, 1.5], // Ajuste o efeito da onda
-                        }),
-                      },
-                    ],
-                  },
-                ]}
+                style={[styles.waveContainer, {
+                  transform: [
+                    {
+                      scaleY: waveAnimation.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [1, 1.5], // Ajuste o efeito da onda
+                      }),
+                    },
+                  ],
+                }]}
               >
                 <View style={styles.wave} />
                 <View style={styles.wave} />
@@ -121,9 +126,16 @@ const Feed = ({ categoria }) => {
               </Animated.View>
             ) : null}
 
+            {/* Botão Play/Pause */}
             <TouchableOpacity
               style={styles.playPauseButtonContainer}
-              onPress={() => (playingIndex === index ? setPlayingIndex(null) : AudioPlay(item.url, index))}
+              onPress={() => {
+                if (playingIndex === index) {
+                  AudioPause(); // Pausa o áudio se estiver tocando
+                } else {
+                  AudioPlay(item.url, index); // Toca o áudio
+                }
+              }}
             >
               <Ionicons
                 name={playingIndex === index ? 'pause' : 'play'}
@@ -155,7 +167,9 @@ const Feed = ({ categoria }) => {
     </View>
   );
 };
-export default Feed
+
+export default Feed;
+
 const styles = StyleSheet.create({
   feedContainer: {
     width: Dimensions.get('window').width,
@@ -178,11 +192,38 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 10,
     elevation: 5,
-    
   },
   filename: {
     color: '#FFF',
     fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
-  }})
+  },
+  waveContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 10,
+  },
+  wave: {
+    width: 5,
+    height: 20,
+    marginHorizontal: 5,
+    backgroundColor: '#FFF',
+    borderRadius: 2,
+  },
+  playPauseButtonContainer: {
+    marginTop: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  playPauseButton: {
+    padding: 10,
+  },
+  navigationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginTop: 20,
+  },
+});

@@ -11,7 +11,7 @@ const regis = async (req, res) => {
     }
 
     // Criando um novo usuário com os dados fornecidos
-    const newUser = new registro({ nome, email, senha });
+    const newUser = new registro({nome, email, senha});
     await newUser.save();  // Salvando o novo usuário no banco de dados
 
     res.status(201).send('Usuário registrado com sucesso!');
