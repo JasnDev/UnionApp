@@ -1,51 +1,54 @@
-import React, { useEffect, useState } from 'react';
-import { SafeAreaView, FlatList, StyleSheet, View, Text, Pressable } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { FlatList, View, Text, Dimensions, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { Audio } from 'expo-av';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
 
-const Feed = () => {
+const Feed = ({ categoria }) => {
   const [audios, setAudios] = useState([]);
   const [currentSound, setCurrentSound] = useState(null);
   const [playingIndex, setPlayingIndex] = useState(null);
+  const [playbackStatus, setPlaybackStatus] = useState(null); // Para controle da barra de progresso
+  const [waveAnimation, setWaveAnimation] = useState(new Animated.Value(0)); // Animação da onda
+  const flatListRef = useRef(null); // Ref para o FlatList
 
   useEffect(() => {
     axios
-      .get('http://10.0.0.225:3030/audios')  // Chama a API para obter todos os áudios
+      .get(`http://10.0.0.225:3030/audios?categoria=${categoria}`)
       .then((response) => {
         const audioData = response.data.map((item, index) => ({
           id: index.toString(),
           filename: item.filename,
-          url: item.url,  // Agora a URL completa é retornada
+          url: item.url,
         }));
         setAudios(audioData);
       })
       .catch((error) => {
         console.error('Erro ao buscar os áudios:', error);
       });
-  }, []);
+  }, [categoria]);
 
   const AudioPlay = async (audiouri, index) => {
-    // Pausa e descarrega o áudio anterior se houver
     if (currentSound) {
       await currentSound.stopAsync();
       await currentSound.unloadAsync();
     }
 
     try {
-      // Cria um novo áudio e começa a tocar
-      const { sound, status } = await Audio.Sound.createAsync(
-        { uri: audiouri },
-        { shouldPlay: true }
-      );
+      const { sound } = await Audio.Sound.createAsync({ uri: audiouri }, { shouldPlay: true });
       setCurrentSound(sound);
       setPlayingIndex(index);
 
-      // Atualiza o estado de reprodução quando o áudio terminar
       sound.setOnPlaybackStatusUpdate((status) => {
         if (status.didJustFinish) {
           setPlayingIndex(null);
           setCurrentSound(null);
+        }
+        setPlaybackStatus(status); // Atualiza o status de reprodução
+
+        // Inicia a animação de onda
+        if (status.isPlaying) {
+          startWaveAnimation();
         }
       });
     } catch (error) {
@@ -53,64 +56,133 @@ const Feed = () => {
     }
   };
 
-  const pauseAudio = async () => {
-    if (currentSound) {
-      await currentSound.pauseAsync();
-      setPlayingIndex(null);
+  // Função para iniciar a animação de onda
+  const startWaveAnimation = () => {
+    Animated.loop(
+      Animated.sequence([ 
+        Animated.timing(waveAnimation, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(waveAnimation, {
+          toValue: 0,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  };
+
+  // Função para navegar entre os áudios (rolagem rápida)
+  const scrollToNextAudio = () => {
+    if (flatListRef.current && playingIndex < audios.length - 1) {
+      flatListRef.current.scrollToIndex({ index: playingIndex + 1, animated: false }); // Desabilita animação
+    }
+  };
+
+  const scrollToPreviousAudio = () => {
+    if (flatListRef.current && playingIndex > 0) {
+      flatListRef.current.scrollToIndex({ index: playingIndex - 1, animated: false }); // Desabilita animação
     }
   };
 
   return (
-    <SafeAreaView>
+    <View style={styles.feedContainer}>
       <FlatList
+        ref={flatListRef}
         data={audios}
-        horizontal
+        horizontal={true} // Exibir itens horizontalmente
         keyExtractor={(item) => item.id}
         renderItem={({ item, index }) => (
           <View style={styles.container}>
-            <Pressable
-              onPress={() =>
-                playingIndex === index ? pauseAudio() : AudioPlay(item.url, index)
-              }
-              style={styles.playButton}
+            <Text style={styles.filename}>{item.filename}</Text>
+
+            {/* Animação de onda */}
+            {playingIndex === index && playbackStatus && playbackStatus.isPlaying ? (
+              <Animated.View
+                style={[
+                  styles.waveContainer,
+                  {
+                    transform: [
+                      {
+                        scaleY: waveAnimation.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [1, 1.5], // Ajuste o efeito da onda
+                        }),
+                      },
+                    ],
+                  },
+                ]}
+              >
+                <View style={styles.wave} />
+                <View style={styles.wave} />
+                <View style={styles.wave} />
+              </Animated.View>
+            ) : null}
+
+            <TouchableOpacity
+              style={styles.playPauseButtonContainer}
+              onPress={() => (playingIndex === index ? setPlayingIndex(null) : AudioPlay(item.url, index))}
             >
               <Ionicons
+                name={playingIndex === index ? 'pause' : 'play'}
                 size={30}
                 color="#FFF"
-                name={playingIndex === index ? 'pause' : 'play'}
+                style={styles.playPauseButton}
               />
-            </Pressable>
-            <Text style={styles.filename}>{item.filename}</Text>
+            </TouchableOpacity>
           </View>
         )}
+        contentContainerStyle={styles.flatListContent}
+        scrollEventThrottle={16} // Melhora a rolagem (valor mais baixo dá maior controle)
+        showsHorizontalScrollIndicator={false} // Remove o indicador de rolagem horizontal
+        getItemLayout={(data, index) => ({
+          length: Dimensions.get('window').width, // Largura do item para ocupar a tela inteira
+          offset: Dimensions.get('window').width * index, // Deslocamento horizontal
+          index,
+        })}
       />
-    </SafeAreaView>
+      
+      <View style={styles.navigationContainer}>
+        <TouchableOpacity onPress={scrollToPreviousAudio} disabled={playingIndex === 0}>
+          <Ionicons name="arrow-back-circle" size={40} color="#FFF" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={scrollToNextAudio} disabled={playingIndex === audios.length - 1}>
+          <Ionicons name="arrow-forward-circle" size={40} color="#FFF" />
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 };
-
-export default Feed;
-
+export default Feed
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    backgroundColor: '#333',
-    padding: 10,
-    borderRadius: 10,
-    marginRight: 15,
-    width: 200,  // Ajuste o tamanho para exibir melhor o carrossel
-    height: 250, // Ajuste o tamanho do item no carrossel
+  feedContainer: {
+    width: Dimensions.get('window').width,
+    backgroundColor: '#1C1C1C', // Tom de fundo mais escuro
+    paddingVertical: 20,
   },
-  playButton: {
-    backgroundColor: '#1DB954',
-    padding: 10,
-    borderRadius: 50,
-    marginBottom: 10,
+  flatListContent: {
+    alignItems: 'center',
+  },
+  container: {
+    width: Dimensions.get('window').width, // Cada item ocupa a tela inteira
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 10,
+    borderRadius: 15,
+    backgroundColor: '#2C2C2C', // Cor do fundo dos itens
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 5,
+    
   },
   filename: {
     color: '#FFF',
-    fontSize: 14,
-    textAlign: 'center', // Centraliza o texto
-    marginTop: 5, // Dá um espaço entre o texto e o botão
-  },
-});
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  }})

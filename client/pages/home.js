@@ -9,7 +9,8 @@ export default function HomePage() {
     <View>
       <View>
         <Header/>
-        <Feed/>   
+      <Feed/>
+        
       </View>
       <View style={styles.container}>
     
