@@ -1,4 +1,4 @@
-import registro from "../connection/connection1.js";
+import registro from "../connection/connection3.js";
 async function GetAll(req,res){
 
 try {

@@ -39,7 +39,7 @@ const Login = () => {
             const hashedPassword = await hashPassword(senha);
             if (hashedPassword) {
                 // Enviar dados para a API
-                const response = await axios.post('http://10.145.45.33:3030/login', {
+                const response = await axios.post('http://10.145.45.21:3030/login', {
                     email: email,
                     senha: hashedPassword  
                 }, {
