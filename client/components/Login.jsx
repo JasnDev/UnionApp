@@ -1,16 +1,14 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import { StyleSheet, TextInput, View, Pressable, Text, Alert, ActivityIndicator } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import * as Crypto from 'expo-crypto';
-import { AppContext } from '../contexts/context.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
     const [loading, setLoading] = useState(false);  // Para mostrar o carregando
-    const [token, setToken] = useContext(AppContext);
     const navigation = useNavigation();
 
     // Função para gerar o hash da senha usando SHA-256
@@ -39,7 +37,7 @@ const Login = () => {
             const hashedPassword = await hashPassword(senha);
             if (hashedPassword) {
                 // Enviar dados para a API
-                const response = await axios.post('http://10.145.45.33:3030/login', {
+                const response = await axios.post('http://10.145.45.21:3030/login', {
                     email: email,
                     senha: hashedPassword  
                 }, {
@@ -48,7 +46,7 @@ const Login = () => {
 
                 // Salvar o token no AsyncStorage
                 await AsyncStorage.setItem('Authorization-token', response.data.token);
-                setToken(response.data.token);  // Atualizar o contexto com o token
+                 // Atualizar o contexto com o token
 
                 // Redirecionar para a Home
                 navigation.navigate("Home");
