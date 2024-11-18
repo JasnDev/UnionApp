@@ -7,16 +7,14 @@ import Feed from '../components/Feed';
 export default function HomePage() {
   return (
     <View>
-      <View>
-        <Header/>
+        <View>
+          <Header/>
+        </View>
+
         <Feed></Feed>
-        <Topics></Topics>
-        
-      </View>
-      <View style={styles.container}>
-   
-        <StatusBar style="auto" />
-      </View>
+        <Topics> </Topics>
+      
+    
     </View>
   );
 }

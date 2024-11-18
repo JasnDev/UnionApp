@@ -42,7 +42,7 @@ const Topics = () => {
 const styles = StyleSheet.create({
   telaCompleta: {
     // Ocupa toda a largura da tela
-    height: Dimensions.get('window').height, // Ocupa toda a altura da tela
+    height: 100, 
     alignItems: 'center',
   },
   caixaCategoria: {
