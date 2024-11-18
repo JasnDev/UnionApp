@@ -114,12 +114,11 @@ const Feed = ({ categoria }) => {
                     {
                       scaleY: waveAnimation.interpolate({
                         inputRange: [0, 1],
-                        outputRange: [1, 1.5], // Ajuste o efeito da onda
+                        outputRange: [1, 1.5], // Ajuste o efeito da onda, valores corretos para animar
                       }),
                     },
                   ],
-                }]}
-              >
+                }]}>
                 <View style={styles.wave} />
                 <View style={styles.wave} />
                 <View style={styles.wave} />

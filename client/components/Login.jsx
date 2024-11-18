@@ -10,7 +10,6 @@ const Login = () => {
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
     const [loading, setLoading] = useState(false);  // Para mostrar o carregando
-    const [token, setToken] = useContext(AppContext);
     const navigation = useNavigation();
 
     // Função para gerar o hash da senha usando SHA-256
@@ -48,7 +47,7 @@ const Login = () => {
 
                 // Salvar o token no AsyncStorage
                 await AsyncStorage.setItem('Authorization-token', response.data.token);
-                setToken(response.data.token);  // Atualizar o contexto com o token
+                 // Atualizar o contexto com o token
 
                 // Redirecionar para a Home
                 navigation.navigate("Home");
