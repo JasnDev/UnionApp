@@ -1,9 +1,8 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import { StyleSheet, TextInput, View, Pressable, Text, Alert, ActivityIndicator } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import * as Crypto from 'expo-crypto';
-import { AppContext } from '../contexts/context.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Login = () => {

@@ -3,12 +3,10 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { View, StyleSheet, Pressable, Text, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useContext } from 'react';
-import { AppContext } from '../contexts/context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Header = () => {
-    const [token, setToken] = useContext(AppContext);
+    const [token, setToken] = useState('');
     const [loading, setLoading] = useState(true);  // Estado para controle de carregamento
     const navigation = useNavigation();
 
