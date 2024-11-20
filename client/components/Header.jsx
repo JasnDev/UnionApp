@@ -38,21 +38,20 @@ const Header = () => {
     return (
         <View style={styles.headerContainer}>
             {loading ? (
-                <ActivityIndicator size="small" color="#000" />
+                <ActivityIndicator size="small" color="#fff" />
             ) : token ? (
-                <View>
-                <Pressable style={styles.iconCenter} onPress={() => navigation.navigate('post')}>
-                    <AntDesign name="pluscircleo" size={35} color="#000" />
-                </Pressable>
-                <Pressable style={styles.iconCenter} onPress={handleLogout}>
-                    <Text>Sair</Text>
-                </Pressable>
-            </View>
-               
+                <View style={styles.iconsContainer}>
+                    <Pressable style={styles.iconButton} onPress={() => navigation.navigate('post')}>
+                        <AntDesign name="pluscircleo" size={35} color="#fff" />
+                    </Pressable>
+                    <Pressable style={styles.iconButton} onPress={handleLogout}>
+                        <Text style={styles.logoutText}>Sair</Text>
+                    </Pressable>
+                </View>
             ) : (
                 <View style={styles.iconCenter}>
-                    <Pressable style={styles.iconCenter} onPress={() => navigation.navigate('Login')}>
-                        <FontAwesome name="user-o" size={24} color="#000" />
+                    <Pressable onPress={() => navigation.navigate('Login')}>
+                        <FontAwesome name="user-o" size={24} color="#fff" />
                     </Pressable>
                 </View>
             )}
@@ -62,21 +61,31 @@ const Header = () => {
 
 const styles = StyleSheet.create({
     headerContainer: {
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',  // Centraliza os ícones verticalmente
+        paddingTop: 40,  // Espaço superior para afastar os ícones da câmera do celular
+        paddingBottom: 15,
+        backgroundColor: '#403d39',
+        width: '100%',
+        borderBottomWidth: 1,
+        borderBottomColor: '#3d3b37',
+    },
+    iconsContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 15,
-        backgroundColor: '#fff',
-        borderBottomWidth: 1,
-        borderBottomColor: '#ddd',
+        justifyContent: 'center',  // Centraliza os ícones horizontalmente
     },
-    iconLeft: {
-        position: 'absolute',
-        left: 20,
+    iconButton: {
+        marginHorizontal: 20,  // Espaçamento entre os ícones
+    },
+    logoutText: {
+        color: '#fff',
+        fontSize: 16,
     },
     iconCenter: {
-        position: 'relative',
-        marginLeft: 50,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });
 
