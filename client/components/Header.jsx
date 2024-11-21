@@ -1,37 +1,38 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { View, StyleSheet, Pressable, Text, ActivityIndicator } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 const Header = () => {
     const [token, setToken] = useState('');
-    const [loading, setLoading] = useState(true);  // Estado para controle de carregamento
+    const [loading, setLoading] = useState(true);
     const navigation = useNavigation();
 
-    useEffect(() => {
-        // Função assíncrona para buscar o token do AsyncStorage
-        const fetchToken = async () => {
-            try {
-                const storedToken = await AsyncStorage.getItem('Authorization-token');
-                setToken(storedToken);  // Atualiza o contexto com o token
-            } catch (error) {
-                console.log("Erro ao buscar token:", error);
-            } finally {
-                setLoading(false);  // Quando terminar de carregar, muda o estado de loading
-            }
-        };
+    useFocusEffect(
+        React.useCallback(() => {
+            const fetchToken = async () => {
+                try {
+                    const storedToken = await AsyncStorage.getItem('Authorization-token');
+                    setToken(storedToken || ''); // Garante que o token será uma string, mesmo se null
+                } catch (error) {
+                    console.log('Erro ao buscar token:', error);
+                } finally {
+                    setLoading(false); // Garante que o estado de carregamento será atualizado
+                }
+            };
 
-        fetchToken();
-    }, []);
+            fetchToken();
+        }, [])
+    );
 
     const handleLogout = async () => {
         try {
             await AsyncStorage.removeItem('Authorization-token');
-            setToken(null);  // Atualiza o contexto removendo o token  // Redireciona para a tela de Login
+            setToken(''); // Reseta o token
         } catch (error) {
-            console.log("Erro ao limpar o token:", error);
+            console.log('Erro ao limpar o token:', error);
         }
     };
 
@@ -41,7 +42,10 @@ const Header = () => {
                 <ActivityIndicator size="small" color="#fff" />
             ) : token ? (
                 <View style={styles.iconsContainer}>
-                    <Pressable style={styles.iconButton} onPress={() => navigation.navigate('post')}>
+                    <Pressable
+                        style={styles.iconButton}
+                        onPress={() => navigation.navigate('post')}
+                    >
                         <AntDesign name="pluscircleo" size={35} color="#fff" />
                     </Pressable>
                     <Pressable style={styles.iconButton} onPress={handleLogout}>
@@ -63,8 +67,8 @@ const styles = StyleSheet.create({
     headerContainer: {
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',  // Centraliza os ícones verticalmente
-        paddingTop: 40,  // Espaço superior para afastar os ícones da câmera do celular
+        justifyContent: 'center',
+        paddingTop: 40,
         paddingBottom: 15,
         backgroundColor: '#403d39',
         width: '100%',
@@ -74,10 +78,10 @@ const styles = StyleSheet.create({
     iconsContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',  // Centraliza os ícones horizontalmente
+        justifyContent: 'center',
     },
     iconButton: {
-        marginHorizontal: 20,  // Espaçamento entre os ícones
+        marginHorizontal: 20,
     },
     logoutText: {
         color: '#fff',

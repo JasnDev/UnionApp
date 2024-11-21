@@ -4,14 +4,16 @@ import GestureRecognizer from 'react-native-swipe-gestures';
 import { Audio } from 'expo-av';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 
 const FeedWithTopics = () => {
   const categories = ['Música', 'Games', 'Culinaria', 'Engraçados'];
-  const [index, setIndex] = useState(0);  // Para o índice da categoria
+  const [index, setIndex] = useState(0);
   const [audios, setAudios] = useState([]);
   const [currentSound, setCurrentSound] = useState(null);
   const [playingIndex, setPlayingIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const isFocused = useIsFocused(); // Verifica se a tela está em foco
 
   useEffect(() => {
     const categoria = categories[index];
@@ -25,6 +27,25 @@ const FeedWithTopics = () => {
       })
       .catch((error) => console.error(error));
   }, [index]);
+
+  useEffect(() => {
+    if (isFocused) {
+      // Reativa o áudio quando a tela é focada
+      if (audios.length > 0) {
+        AudioPlay(audios[playingIndex]?.url, playingIndex);
+      }
+    } else {
+      // Pausa o áudio ao sair da tela
+      AudioPause();
+    }
+
+    return () => {
+      if (!isFocused) {
+        // Garante que o áudio seja pausado ao desmontar a tela
+        AudioPause();
+      }
+    };
+  }, [isFocused]);
 
   const AudioPlay = async (uri, index) => {
     if (currentSound) {
@@ -67,7 +88,7 @@ const FeedWithTopics = () => {
 
   const handleSwipeDown = () => {
     const nextIndex = (index + 1) % categories.length;
-    setIndex(nextIndex);  // Atualiza a categoria
+    setIndex(nextIndex);
   };
 
   const handleSwipeLeft = () => {
@@ -89,61 +110,58 @@ const FeedWithTopics = () => {
 
   return (
     <GestureRecognizer
-  onSwipeDown={handleSwipeDown}  // Muda categoria
-  onSwipeLeft={handleSwipeLeft}   // Troca para próximo áudio
-  onSwipeRight={handleSwipeRight} // Troca para áudio anterior
-  config={config}
-  style={styles.gestureContainer}  // Garantindo gestos na tela toda
-  scrollEnabled={false}  // Desativa o scroll
->
-  {/* Tópicos */}
-  <View style={styles.topicsContainer}>
-    <Text style={styles.topicText}>{categories[index]}</Text>
-  </View>
-
-  {/* Feed de Áudios */}
-  <View style={styles.audioContainer}>
-    {audios.length > 0 ? (
-      <View style={styles.titleAndButtonContainer}>
-        <Text style={styles.filename}>{audios[playingIndex]?.filename}</Text>
-        <TouchableOpacity
-          onPress={handlePlayPause}
-          style={styles.playPauseButtonContainer}
-        >
-          <Ionicons
-            name={isPlaying ? 'pause' : 'play'}
-            size={40}
-            color="#FFF"
-          />
-        </TouchableOpacity>
+      onSwipeDown={handleSwipeDown}
+      onSwipeLeft={handleSwipeLeft}
+      onSwipeRight={handleSwipeRight}
+      config={config}
+      style={styles.gestureContainer}
+      scrollEnabled={false}
+    >
+      <View style={styles.topicsContainer}>
+        <Text style={styles.topicText}>{categories[index]}</Text>
       </View>
-    ) : (
-      <Text style={styles.noAudioMessage}>Nenhum áudio disponível</Text>
-    )}
-  </View>
-</GestureRecognizer>
+      <View style={styles.audioContainer}>
+        {audios.length > 0 ? (
+          <View style={styles.titleAndButtonContainer}>
+            <Text style={styles.filename}>{audios[playingIndex]?.filename}</Text>
+            <TouchableOpacity
+              onPress={handlePlayPause}
+              style={styles.playPauseButtonContainer}
+            >
+              <Ionicons
+                name={isPlaying ? 'pause' : 'play'}
+                size={40}
+                color="#FFF"
+              />
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <Text style={styles.noAudioMessage}>Nenhum áudio disponível</Text>
+        )}
+      </View>
+    </GestureRecognizer>
   );
 };
 
 const styles = StyleSheet.create({
-    gestureContainer: {
-        flex: 1,
-        width: Dimensions.get('window').width,
-        height: Dimensions.get('window').height,
-        justifyContent: 'flex-start',
-        alignItems: 'center',
-        backgroundColor: 'transparent',
-        overflow: 'hidden',  // Garante que o conteúdo que ultrapassar os limites não apareça
-      },
+  gestureContainer: {
+    flex: 1,
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+    overflow: 'hidden',
+  },
   topicsContainer: {
-    marginTop: 50, // Distância entre o cabeçalho e os tópicos
-    marginBottom: 30, // Espaço entre os tópicos e o feed
+    marginTop: 50,
+    marginBottom: 30,
     backgroundColor: '#3CB371',
     padding: 20,
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    width: '80%',  // Ajuste a largura para não ocupar toda a tela
+    width: '80%',
   },
   topicText: {
     color: '#000000',
@@ -151,7 +169,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   audioContainer: {
-    width: '80%',  // Ajuste a largura do container para não ocupar toda a tela
+    width: '80%',
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 150,
