@@ -54,7 +54,7 @@ const Register = () => {
             // Gerando o hash da senha
             hashPassword(senha).then((hashedPassword) => {
                 if (hashedPassword) {
-                    axios.post('http://10.0.0.225:3030/registro', {
+                    axios.post('http://10.145.45.33:3030/registro', {
                         nome: nome,
                         email: email,
                         senha: hashedPassword

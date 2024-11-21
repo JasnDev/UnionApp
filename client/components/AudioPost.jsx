@@ -58,36 +58,44 @@ const AudioPost = () => {
 
     // Define a URI de destino e realiza a cópia no momento em que save é pressionado
     const fileUri = FileSystem.documentDirectory + `audio_file${num}.m4a`;
-    await FileSystem.copyAsync({ from: recordingUri, to: fileUri });
-    setFileUrl(fileUri); // Armazena a URL salva para enviar ao servidor
-
-    console.log('Áudio salvo em:', fileUri);
-
-    const file = {
-      uri: fileUri,
-      type: 'audio/m4a', 
-      name: `audio_file${num}.m4a`
-    };
-
-    const formData = new FormData();
-    formData.append('audio', file);
-
     try {
-      const response = await fetch('http://10.145.45.21:3030/upload', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        },
-        body: formData
-      });
+      await FileSystem.copyAsync({ from: recordingUri, to: fileUri });
+      console.log('Áudio copiado para:', fileUri);
 
-      const data = await response.json();
-      console.log('Áudio enviado com sucesso:', data);
+      // Verifica se o arquivo foi copiado corretamente
+      const file = {
+        uri: fileUri,
+        type: 'audio/m4a', 
+        name: `audio_file${num}.m4a`
+      };
+
+      const formData = new FormData();
+      formData.append('audio', file);
+
+      try {
+        const response = await fetch('http://10.145.45.33:3030/upload', {
+          method: 'POST',
+          body: formData, // O fetch automaticamente define o content-type para multipart/form-data
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Áudio enviado com sucesso:', data);
+          Alert.alert('Sucesso', 'Áudio enviado com sucesso!');
+        } else {
+          const errorData = await response.json();
+          console.error('Erro no envio:', errorData);
+          Alert.alert('Erro', 'Ocorreu um erro ao enviar o áudio.');
+        }
+      } catch (error) {
+        console.error('Erro ao enviar o áudio:', error);
+        Alert.alert('Erro', 'Ocorreu um erro ao tentar enviar o áudio.');
+      }
     } catch (error) {
-      console.error('Erro ao enviar o áudio:', error);
+      console.error('Erro ao copiar o arquivo:', error);
+      Alert.alert('Erro', 'Erro ao salvar o arquivo de áudio.');
     }
   };
-
 
   // Função para tocar o áudio
   const playAudio = async () => {
