@@ -1,9 +1,9 @@
-import { Audio } from 'expo-av';
+import { Audio } from 'expo-av'; 
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import * as FileSystem from 'expo-file-system';
 import GestureRecognizer from 'react-native-swipe-gestures';
-import React, { useEffect, useRef, useState } from 'react';
-import { Button, Text, View, StyleSheet, Alert, Dimensions, Pressable } from 'react-native';
+import React, { useState } from 'react';
+import { Button, Text, StyleSheet, Alert, Dimensions, Pressable, View } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 
@@ -14,6 +14,7 @@ const AudioPost = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [gestureAction, setGestureAction] = useState("");
+  const [selectedTopics, setSelectedTopics] = useState([]); // Estado para os tópicos selecionados
 
   const num = Math.random() * 100;
 
@@ -32,6 +33,7 @@ const AudioPost = () => {
       setRecording(recording);
     } catch (error) {
       console.error('Erro ao iniciar a gravação:', error);
+      Alert.alert('Erro', 'Erro ao iniciar a gravação.');
     }
   };
 
@@ -46,6 +48,7 @@ const AudioPost = () => {
       console.log('Áudio gravado em:', uri);
     } catch (error) {
       console.error('Erro ao parar a gravação:', error);
+      Alert.alert('Erro', 'Erro ao parar a gravação.');
     }
   };
 
@@ -53,31 +56,33 @@ const AudioPost = () => {
   const save = async () => {
     if (!recordingUri) {
       console.error('Nenhum áudio para salvar');
+      Alert.alert('Erro', 'Nenhum áudio gravado para salvar.');
       return;
     }
-
-    // Define a URI de destino e realiza a cópia no momento em que save é pressionado
+  
     const fileUri = FileSystem.documentDirectory + `audio_file${num}.m4a`;
     try {
       await FileSystem.copyAsync({ from: recordingUri, to: fileUri });
       console.log('Áudio copiado para:', fileUri);
-
-      // Verifica se o arquivo foi copiado corretamente
+  
       const file = {
         uri: fileUri,
         type: 'audio/m4a', 
         name: `audio_file${num}.m4a`
       };
-
+  
       const formData = new FormData();
       formData.append('audio', file);
-
+  
+      // Adicionando os tópicos selecionados ao FormData
+      formData.append('topicos', JSON.stringify(selectedTopics)); // Enviando como JSON
+  
       try {
         const response = await fetch('http://10.145.45.33:3030/upload', {
           method: 'POST',
-          body: formData, // O fetch automaticamente define o content-type para multipart/form-data
+          body: formData,
         });
-
+  
         if (response.ok) {
           const data = await response.json();
           console.log('Áudio enviado com sucesso:', data);
@@ -99,6 +104,10 @@ const AudioPost = () => {
 
   // Função para tocar o áudio
   const playAudio = async () => {
+    if (!recordingUri) {
+      Alert.alert('Erro', 'Nenhum áudio gravado para tocar.');
+      return;
+    }
     try {
       const { sound } = await Audio.Sound.createAsync(
         { uri: recordingUri },
@@ -113,6 +122,7 @@ const AudioPost = () => {
       });
     } catch (error) {
       console.error('Erro ao tentar reproduzir o áudio', error);
+      Alert.alert('Erro', 'Erro ao tentar reproduzir o áudio.');
     }
   };
 
@@ -122,6 +132,15 @@ const AudioPost = () => {
       await sound.pauseAsync();
       setIsPlaying(false);
     }
+  };
+
+  // Função para selecionar/desmarcar tópicos
+  const toggleTopic = (topic) => {
+    setSelectedTopics((prev) =>
+      prev.includes(topic)
+        ? prev.filter((t) => t !== topic)
+        : [...prev, topic]
+    );
   };
 
   // Configurações de gestos
@@ -154,6 +173,7 @@ const AudioPost = () => {
         directionalOffsetThreshold: 80,
       }}
       style={styles.container}
+      accessibilityLabel='Segure para gravar, arraste para cima para ouvir o áudio gravado, arraste para direita para descartar, e arraste para esquerda para postar o áudio'
     >
       <Pressable onPressIn={startRecording} onPressOut={stopRecording}>
         <FontAwesome name="microphone" size={60} color={isRecording ? 'red' : 'black'} />
@@ -162,6 +182,25 @@ const AudioPost = () => {
       <Text style={styles.statusText}>
         {isRecording ? 'Gravando...' : gestureAction || 'Toque para gravar'}
       </Text>
+
+      {/* Exibe os botões para selecionar tópicos após a gravação */}
+      {recordingUri && !isRecording && (
+        <View style={styles.topicsContainer}>
+          <Text style={styles.topicLabel}>Escolha os tópicos:</Text>
+          {['Música', 'Games', 'Culinaria', 'Engraçados'].map((topic) => (
+            <Pressable
+              key={topic}
+              style={[
+                styles.topicButton,
+                selectedTopics.includes(topic) && styles.selectedTopicButton
+              ]}
+              onPress={() => toggleTopic(topic)}
+            >
+              <Text style={styles.topicButtonText}>{topic}</Text>
+            </Pressable>
+          ))}
+        </View>
+      )}
 
       {/* Exibe o botão de pausa somente se o áudio está sendo reproduzido */}
       {recordingUri && isPlaying && (
@@ -178,12 +217,33 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    width: width, // Usa a largura da janela
-    height: height, // Usa a altura da janela
+    width: width,
+    height: height,
   },
   statusText: {
     marginTop: 20,
     fontSize: 16,
     textAlign: 'center',
+  },
+  topicsContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  topicLabel: {
+    fontSize: 18,
+    marginBottom: 10,
+  },
+  topicButton: {
+    backgroundColor: '#ddd',
+    padding: 10,
+    marginBottom: 5,
+    borderRadius: 5,
+  },
+  selectedTopicButton: {
+    backgroundColor: '#4CAF50',
+  },
+  topicButtonText: {
+    fontSize: 16,
+    color: 'black',
   },
 });

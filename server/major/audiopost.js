@@ -11,6 +11,13 @@ const uploadAudio = async (req, res) => {
     // Cria o GridFSBucket a partir da conexão existente
     const bucket = createGridFSBucket();
 
+    // Pega os tópicos enviados pela requisição
+    const { topicos } = req.body; // Supondo que 'topicos' seja um array ou string
+
+    if (!topicos) {
+      return res.status(400).json({ error: 'Topicos são obrigatórios.' });
+    }
+
     // Caminho da pasta 'uploads'
     const folderPath = path.join(__dirname, '../uploads');
 
@@ -43,9 +50,10 @@ const uploadAudio = async (req, res) => {
 
         console.log(`Tipo de conteúdo: ${mimeType}`);
 
-        // Cria o stream de upload para o GridFS
+        // Cria o stream de upload para o GridFS e inclui 'topicos' como metadado
         const uploadStream = bucket.openUploadStream(file, {
           contentType: mimeType,
+          metadata: { topicos }, // Inclui os tópicos no metadado
         });
 
         // Envia o arquivo para o GridFS e lida com eventos
