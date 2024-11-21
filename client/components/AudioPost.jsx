@@ -1,8 +1,9 @@
 import { Audio } from 'expo-av';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import * as FileSystem from 'expo-file-system';
-import React, { useEffect, useState } from 'react';
-import { Button, Pressable, Text, View, StyleSheet, Alert, Dimensions } from 'react-native';
+import GestureRecognizer from 'react-native-swipe-gestures';
+import React, { useEffect, useRef, useState } from 'react';
+import { Button, Text, View, StyleSheet, Alert, Dimensions, Pressable } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 
@@ -11,11 +12,10 @@ const AudioPost = () => {
   const [recordingUri, setRecordingUri] = useState(null);
   const [sound, setSound] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [fileUrl, setFileUrl] = useState(null); 
   const [isRecording, setIsRecording] = useState(false);
+  const [gestureAction, setGestureAction] = useState("");
 
   const num = Math.random() * 100;
-
 
   // Função para iniciar a gravação
   const startRecording = async () => {
@@ -37,11 +37,12 @@ const AudioPost = () => {
 
   // Função para parar a gravação
   const stopRecording = async () => {
+    if (!recording) return;
     try {
       setIsRecording(false);
       await recording.stopAndUnloadAsync();
       const uri = recording.getURI();
-      setRecordingUri(uri); // Armazena URI temporário
+      setRecordingUri(uri);
       console.log('Áudio gravado em:', uri);
     } catch (error) {
       console.error('Erro ao parar a gravação:', error);
@@ -72,7 +73,7 @@ const AudioPost = () => {
     formData.append('audio', file);
 
     try {
-      const response = await fetch('http://10.0.0.225:3030/upload', {
+      const response = await fetch('http://10.145.45.21:3030/upload', {
         method: 'POST',
         headers: {
           'Content-Type': 'multipart/form-data'
@@ -87,15 +88,17 @@ const AudioPost = () => {
     }
   };
 
+
+  // Função para tocar o áudio
   const playAudio = async () => {
     try {
       const { sound } = await Audio.Sound.createAsync(
-        { uri: recordingUri || fileUrl }, // Usar o URI temporário ou salvo
+        { uri: recordingUri },
         { shouldPlay: true }
       );
       setSound(sound);
       setIsPlaying(true);
-      sound.setOnPlaybackStatusUpdate(status => {
+      sound.setOnPlaybackStatusUpdate((status) => {
         if (status.didJustFinish) {
           setIsPlaying(false);
         }
@@ -105,6 +108,7 @@ const AudioPost = () => {
     }
   };
 
+  // Função para pausar o áudio
   const pauseAudio = async () => {
     if (sound) {
       await sound.pauseAsync();
@@ -112,37 +116,50 @@ const AudioPost = () => {
     }
   };
 
-  useEffect(() => {
-    Audio.setAudioModeAsync({
-      allowsRecordingIOS: true,
-      playsInSilentModeIOS: true,
-      playThroughEarpieceAndroid: false, 
-      shouldDuckAndroid: true,
-    }).catch((error) => console.error('Erro ao configurar modo de áudio:', error));
-  
-    return sound ? () => sound.unloadAsync() : undefined;
-  }, [sound]);
-  
-  
+  // Configurações de gestos
+  const onSwipe = (direction) => {
+    switch (direction) {
+      case 'SWIPE_LEFT':
+        setGestureAction('Postar áudio');
+        save();
+        break;
+      case 'SWIPE_RIGHT':
+        setGestureAction('Descartar áudio');
+        setRecordingUri(null);
+        Alert.alert('Áudio descartado!');
+        break;
+      case 'SWIPE_UP':
+        setGestureAction('Tocar áudio');
+        playAudio();
+        break;
+      default:
+        setGestureAction('');
+        break;
+    }
+  };
 
   return (
-    <View accessible={true} accessibilityLabel='Página para criação de áudios.' style={styles.container}>
-      <Pressable onPressIn={startRecording} onPressOut={stopRecording} >
+    <GestureRecognizer
+      onSwipe={(direction) => onSwipe(direction)}
+      config={{
+        velocityThreshold: 0.3,
+        directionalOffsetThreshold: 80,
+      }}
+      style={styles.container}
+    >
+      <Pressable onPressIn={startRecording} onPressOut={stopRecording}>
         <FontAwesome name="microphone" size={60} color={isRecording ? 'red' : 'black'} />
-        {isRecording && <Text>Gravando...</Text>}
       </Pressable>
-      {recordingUri ? (
-        <>
-          <Button style={styles.pauseButton} title={isPlaying ? 'Pausar' : 'Tocar'} onPress={isPlaying ? pauseAudio : playAudio} />
-          {isPlaying ? <Text>Áudio em reprodução...</Text> : <Text>Áudio pausado</Text>}
-        </>
-      ) : (
-        console.log('err')
+
+      <Text style={styles.statusText}>
+        {isRecording ? 'Gravando...' : gestureAction || 'Toque para gravar'}
+      </Text>
+
+      {/* Exibe o botão de pausa somente se o áudio está sendo reproduzido */}
+      {recordingUri && isPlaying && (
+        <Button title="Pausar" onPress={pauseAudio} />
       )}
-      <Pressable onPress={save} style={styles.saveButton}>
-        <Text>Postar o áudio</Text>
-      </Pressable>
-    </View>
+    </GestureRecognizer>
   );
 };
 
@@ -156,16 +173,9 @@ const styles = StyleSheet.create({
     width: width, // Usa a largura da janela
     height: height, // Usa a altura da janela
   },
-  saveButton: {
+  statusText: {
     marginTop: 20,
-    padding: 10,
-    color: 'white',
-    backgroundColor: '#2196F3',
-    borderRadius: 5,
+    fontSize: 16,
+    textAlign: 'center',
   },
-  pauseButton: {
-    marginTop: 20,
-    padding: 10,
-    borderRadius: 5,
-  }
 });

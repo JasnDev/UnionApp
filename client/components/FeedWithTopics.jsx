@@ -18,7 +18,7 @@ const FeedWithTopics = () => {
   useEffect(() => {
     const categoria = categories[index];
     axios
-      .get(`http://10.0.0.225:3030/audios?categoria=${categoria}`)
+      .get(`http://10.145.45.21:3030/audios?categoria=${categoria}`)
       .then((response) => {
         setAudios(response.data);
         if (response.data.length > 0) {
