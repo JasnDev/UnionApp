@@ -11,11 +11,26 @@ const uploadAudio = async (req, res) => {
     // Cria o GridFSBucket a partir da conexão existente
     const bucket = createGridFSBucket();
 
-    // Pega os tópicos enviados pela requisição
-    const { topicos } = req.body; // Supondo que 'topicos' seja um array ou string
+    // Pega os tópicos enviados pela requisição e garante que sejam um array
+    let { topicos } = req.body; // 'topicos' pode ser enviado como string ou array
 
     if (!topicos) {
       return res.status(400).json({ error: 'Topicos são obrigatórios.' });
+    }
+
+    // Se 'topicos' for uma string, tentamos analisar como JSON
+    if (typeof topicos === 'string') {
+      try {
+        // Tentamos converter a string para um array, caso seja uma string JSON
+        topicos = JSON.parse(topicos);
+      } catch (e) {
+        return res.status(400).json({ error: 'O campo "topicos" deve ser um array ou uma string válida que represente um array.' });
+      }
+    }
+
+    // Verifica se 'topicos' é realmente um array
+    if (!Array.isArray(topicos)) {
+      return res.status(400).json({ error: 'O campo "topicos" deve ser um array.' });
     }
 
     // Caminho da pasta 'uploads'
@@ -53,7 +68,7 @@ const uploadAudio = async (req, res) => {
         // Cria o stream de upload para o GridFS e inclui 'topicos' como metadado
         const uploadStream = bucket.openUploadStream(file, {
           contentType: mimeType,
-          metadata: { topicos }, // Inclui os tópicos no metadado
+          metadata: { topicos }, // Inclui os tópicos no metadado como array
         });
 
         // Envia o arquivo para o GridFS e lida com eventos

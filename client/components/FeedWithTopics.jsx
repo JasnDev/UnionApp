@@ -7,8 +7,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 
 const FeedWithTopics = () => {
-  const categories = ['Música', 'Games', 'Culinaria', 'Engraçados'];
-  const [index, setIndex] = useState(0);
+  const categories = ['Todos', 'Música', 'Games', 'Culinaria', 'Engraçados'];  // Adiciona a opção "Todos"
+  const [index, setIndex] = useState(0);  // Índice inicial é 0, ou seja, "Todos"
   const [audios, setAudios] = useState([]);
   const [currentSound, setCurrentSound] = useState(null);
   const [playingIndex, setPlayingIndex] = useState(0);
@@ -16,32 +16,41 @@ const FeedWithTopics = () => {
   const isFocused = useIsFocused(); // Verifica se a tela está em foco
 
   useEffect(() => {
-    const categoria = categories[index];
+    const categoria = categories[index];  // Obtém o tópico atual com base no índice
+    let url = 'http://10.145.45.33:3030/audios';  // URL base para requisição
+
+    // Verifica se a categoria é "Todos", se for, não aplica filtro
+    if (categoria !== 'Todos') {
+      url += `?topico=${categoria}`;  // Adiciona o filtro para a categoria selecionada
+    }
+
     axios
-      .get(`http://10.145.45.33:3030/audios?categoria=${categoria}`)
+      .get(url) // Filtro por tópico ou todos os áudios
       .then((response) => {
-        setAudios(response.data);
-        if (response.data.length > 0) {
-          AudioPlay(response.data[0].url, 0);
+        if (response.data.length === 0) {
+          setAudios([]); // Caso não haja áudios para o tópico
+        } else {
+          setAudios(response.data);
+          AudioPlay(response.data[0].url, 0); // Toca o primeiro áudio ao carregar
         }
       })
-      .catch((error) => console.error(error));
+      .catch((error) => {
+        console.error('Erro na requisição:', error.response || error.message);
+        setAudios([]); // Garantir que o estado fique vazio em caso de erro
+      });
   }, [index]);
 
   useEffect(() => {
     if (isFocused) {
-      // Reativa o áudio quando a tela é focada
       if (audios.length > 0) {
         AudioPlay(audios[playingIndex]?.url, playingIndex);
       }
     } else {
-      // Pausa o áudio ao sair da tela
       AudioPause();
     }
 
     return () => {
       if (!isFocused) {
-        // Garante que o áudio seja pausado ao desmontar a tela
         AudioPause();
       }
     };
@@ -50,19 +59,19 @@ const FeedWithTopics = () => {
   const AudioPlay = async (uri, index) => {
     if (currentSound) {
       await currentSound.stopAsync();
-      await currentSound.unloadAsync();
+      await currentSound.unloadAsync(); // Descarregar o áudio anterior
     }
-
+  
     try {
       const { sound } = await Audio.Sound.createAsync(
         { uri },
         { shouldPlay: true, isLooping: true }
       );
-
+  
       setCurrentSound(sound);
       setPlayingIndex(index);
       setIsPlaying(true);
-
+  
       sound.setOnPlaybackStatusUpdate((status) => {
         setIsPlaying(status.isPlaying);
       });
@@ -70,7 +79,7 @@ const FeedWithTopics = () => {
       console.error('Erro ao reproduzir o áudio:', error);
     }
   };
-
+  
   const AudioPause = async () => {
     if (currentSound) {
       await currentSound.pauseAsync();
@@ -96,7 +105,7 @@ const FeedWithTopics = () => {
       AudioPlay(audios[playingIndex + 1]?.url, playingIndex + 1);
     }
   };
-
+  
   const handleSwipeRight = () => {
     if (playingIndex > 0) {
       AudioPlay(audios[playingIndex - 1]?.url, playingIndex - 1);
@@ -104,7 +113,7 @@ const FeedWithTopics = () => {
   };
 
   const config = {
-    velocityThreshold: 0.3,
+    velocityThreshold: 0.5,
     directionalOffsetThreshold: 80,
   };
 
