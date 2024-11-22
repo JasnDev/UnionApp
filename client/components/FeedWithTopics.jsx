@@ -18,7 +18,7 @@ const FeedWithTopics = () => {
   useEffect(() => {
     const categoria = categories[index];
     axios
-      .get(`http://10.0.0.225:3030/audios?categoria=${categoria}`)
+      .get(`http://10.145.45.26:3030/audios?categoria=${categoria}`)
       .then((response) => {
         setAudios(response.data);
         if (response.data.length > 0) {
@@ -117,9 +117,11 @@ const FeedWithTopics = () => {
       style={styles.gestureContainer}
       scrollEnabled={false}
     >
+      <View style={styles.backgroundContainer}></View>
       <View style={styles.topicsContainer}>
         <Text style={styles.topicText}>{categories[index]}</Text>
       </View>
+
       <View style={styles.audioContainer}>
         {audios.length > 0 ? (
           <View style={styles.titleAndButtonContainer}>
@@ -145,23 +147,27 @@ const FeedWithTopics = () => {
 
 const styles = StyleSheet.create({
   gestureContainer: {
-    flex: 1,
     width: Dimensions.get('window').width,
     height: Dimensions.get('window').height,
     justifyContent: 'flex-start',
     alignItems: 'center',
     backgroundColor: 'transparent',
     overflow: 'hidden',
+    
+    
   },
   topicsContainer: {
-    marginTop: 50,
+    marginTop: 0,
     marginBottom: 30,
-    backgroundColor: '#3CB371',
-    padding: 20,
-    borderRadius: 10,
+    backgroundColor: '#A9CD6F',
+    padding: 30,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    width: '80%',
+    width: '100%',
   },
   topicText: {
     color: '#000000',
@@ -172,7 +178,16 @@ const styles = StyleSheet.create({
     width: '80%',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 150,
+    position: 'relative',
+    bottom: '35',
+    height: '65%',
+    width: Dimensions.get('window').width,
+    backgroundColor: '#BFE87A',
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,  
+  
+
+  
   },
   titleAndButtonContainer: {
     flexDirection: 'column',
@@ -193,6 +208,7 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 16,
   },
+
 });
 
 export default FeedWithTopics;

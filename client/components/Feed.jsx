@@ -14,7 +14,7 @@ const Feed = ({ categoria }) => {
 
   useEffect(() => {
     axios
-      .get(`http://10.145.45.33:3030/audios?categoria=${categoria}`)
+      .get(`http://10.145.45.26:3030/audios?categoria=${categoria}`)
       .then((response) => {
         const audioData = response.data.map((item, index) => ({
           id: index.toString(),
@@ -124,7 +124,7 @@ const Feed = ({ categoria }) => {
                 <View style={styles.wave} />
               </Animated.View>
             ) : null}
-
+            
             {/* Botão Play/Pause */}
             <TouchableOpacity
               style={styles.playPauseButtonContainer}
@@ -172,7 +172,7 @@ export default Feed;
 const styles = StyleSheet.create({
   feedContainer: {
     width: Dimensions.get('window').width,
-    backgroundColor: '#1C1C1C', // Tom de fundo mais escuro
+    backgroundColor: "#D5FF8F",// Tom de fundo mais escuro
     paddingVertical: 20,
   },
   flatListContent: {
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginVertical: 10,
     borderRadius: 15,
-    backgroundColor: '#2C2C2C', // Cor do fundo dos itens
+    backgroundColor: '#D5FF8F', // Cor do fundo dos itens
     padding: 15,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },

@@ -17,7 +17,7 @@ const getAllAudios = async (req, res) => {
         length: file.length,
         uploadDate: file.uploadDate,
         contentType: file.contentType,
-        url: `http://10.0.0.225:3030/audio/${file.filename}`  // Incluindo a URL completa
+        url: `http://10.145.45.26:3030/audio/${file.filename}`  // Incluindo a URL completa
       });
     });
 

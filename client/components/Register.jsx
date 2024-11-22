@@ -54,7 +54,7 @@ const Register = () => {
             // Gerando o hash da senha
             hashPassword(senha).then((hashedPassword) => {
                 if (hashedPassword) {
-                    axios.post('http://10.0.0.225:3030/registro', {
+                    axios.post('http://10.145.45.26:3030/registro', {
                         nome: nome,
                         email: email,
                         senha: hashedPassword
@@ -113,7 +113,7 @@ const Register = () => {
             ) : null}
 
             <Pressable style={styles.button} onPress={regi}>
-                <Text style={styles.buttonText}>Confirmar Registro</Text>
+                <Text style={styles.buttonText}>Registrar</Text>
             </Pressable>
         </View>
     );

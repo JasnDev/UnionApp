@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#3CB371',
     width: 150, // Largura fixa
-    padding: 20, 
+    padding: 40, 
     borderRadius: 10,
   },
   textoCategoria: {
