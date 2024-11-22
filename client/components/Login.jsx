@@ -41,7 +41,7 @@ const Login = () => {
                     email: email,
                     senha: hashedPassword  
                 }, {
-                    headers: { 'Content-Type': 'application/json' }
+                  headers: { 'Content-Type': 'application/json' }
                 });
 
                 // Salvar o token no AsyncStorage

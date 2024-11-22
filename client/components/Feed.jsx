@@ -4,6 +4,7 @@ import { Audio } from 'expo-av';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
 
+
 const Feed = ({ categoria }) => {
   const [audios, setAudios] = useState([]);
   const [currentSound, setCurrentSound] = useState(null);
@@ -157,10 +158,10 @@ const Feed = ({ categoria }) => {
 
       <View style={styles.navigationContainer}>
         <TouchableOpacity onPress={scrollToPreviousAudio} disabled={playingIndex === 0}>
-          <Ionicons name="arrow-back-circle" size={40} color="#FFF" />
+          <Ionicons name="arrow-back-circle" size={40} color="#000" />
         </TouchableOpacity>
         <TouchableOpacity onPress={scrollToNextAudio} disabled={playingIndex === audios.length - 1}>
-          <Ionicons name="arrow-forward-circle" size={40} color="#FFF" />
+          <Ionicons name="arrow-forward-circle" size={40} color="#000" />
         </TouchableOpacity>
       </View>
     </View>

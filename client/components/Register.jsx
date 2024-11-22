@@ -54,11 +54,7 @@ const Register = () => {
             // Gerando o hash da senha
             hashPassword(senha).then((hashedPassword) => {
                 if (hashedPassword) {
-<<<<<<< HEAD
-                    axios.post('http://10.145.45.26:3030/registro', {
-=======
                     axios.post('http://10.145.45.33:3030/registro', {
->>>>>>> 4b18ac35671c4a82c91806ef87618b103370a89e
                         nome: nome,
                         email: email,
                         senha: hashedPassword

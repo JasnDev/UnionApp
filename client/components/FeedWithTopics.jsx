@@ -5,7 +5,7 @@ import { Audio } from 'expo-av';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
-
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 const FeedWithTopics = () => {
   const categories = ['Música', 'Games', 'Culinaria', 'Engraçados'];
   const [index, setIndex] = useState(0);
@@ -121,10 +121,12 @@ const FeedWithTopics = () => {
       <View style={styles.topicsContainer}>
         <Text style={styles.topicText}>{categories[index]}</Text>
       </View>
-
+      
       <View style={styles.audioContainer}>
         {audios.length > 0 ? (
           <View style={styles.titleAndButtonContainer}>
+             <MaterialIcons style={styles.icon} name="graphic-eq" size={85} color="black" />
+
             <Text style={styles.filename}>{audios[playingIndex]?.filename}</Text>
             <TouchableOpacity
               onPress={handlePlayPause}
@@ -133,7 +135,7 @@ const FeedWithTopics = () => {
               <Ionicons
                 name={isPlaying ? 'pause' : 'play'}
                 size={40}
-                color="#FFF"
+                color="#000"
               />
             </TouchableOpacity>
           </View>
@@ -195,7 +197,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   filename: {
-    color: '#FFF',
+    color: '#00000',
     fontSize: 18,
     textAlign: 'center',
     marginBottom: 10,
@@ -208,7 +210,10 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 16,
   },
-
+  icon: {
+    marginBottom: 60,
+  
+  }
 });
 
 export default FeedWithTopics;
