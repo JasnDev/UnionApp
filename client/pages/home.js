@@ -12,7 +12,7 @@ const Home = () => {
 
   return (
     <View style={styles.container}>
-      <Header /> 
+      <Header />
       <FeedWithTopics onCategoriaChange={handleCategoriaChange} />
     </View>
   );
