@@ -182,6 +182,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 150,
+    
   },
   titleAndButtonContainer: {
     flexDirection: 'column',
