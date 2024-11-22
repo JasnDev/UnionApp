@@ -12,9 +12,13 @@ const Home = () => {
 
   return (
     <View style={styles.container}>
+<<<<<<< HEAD
       
       <Header /> {/* Cabeçalho */}
       {/* Remover o ScrollView para evitar o conflito de rolagem */}
+=======
+      <Header />
+>>>>>>> 4b18ac35671c4a82c91806ef87618b103370a89e
       <FeedWithTopics onCategoriaChange={handleCategoriaChange} />
     </View>
   );
