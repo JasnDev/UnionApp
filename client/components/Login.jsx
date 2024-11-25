@@ -227,5 +227,5 @@ const styles = StyleSheet.create({
         paddingVertical: 15,
     }
 });
-
+//textudo
 export default Login;
