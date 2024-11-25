@@ -5,7 +5,7 @@ import { Audio } from 'expo-av';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
-
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 const FeedWithTopics = () => {
   const categories = ['Todos', 'Música', 'Games', 'Culinaria', 'Engraçados'];  // Adiciona a opção "Todos"
   const [index, setIndex] = useState(0);  // Índice inicial é 0, ou seja, "Todos"
@@ -17,15 +17,14 @@ const FeedWithTopics = () => {
 
   useEffect(() => {
     const categoria = categories[index];  // Obtém o tópico atual com base no índice
-    let url = 'http://10.145.45.33:3030/audios';  // URL base para requisição
+    let url = 'http://10.145.45.26:3030/audios';  // URL base para requisição
 
     // Verifica se a categoria é "Todos", se for, não aplica filtro
     if (categoria !== 'Todos') {
       url += `?topico=${categoria}`;  // Adiciona o filtro para a categoria selecionada
     }
 
-    axios
-      .get(url) // Filtro por tópico ou todos os áudios
+    axios.get(`http://10.145.45.26:3030/audios?categoria=${categoria}`) // Filtro por tópico ou todos os áudios
       .then((response) => {
         if (response.data.length === 0) {
           setAudios([]); // Caso não haja áudios para o tópico
@@ -126,12 +125,16 @@ const FeedWithTopics = () => {
       style={styles.gestureContainer}
       scrollEnabled={false}
     >
+      <View style={styles.backgroundContainer}></View>
       <View style={styles.topicsContainer}>
         <Text style={styles.topicText}>{categories[index]}</Text>
       </View>
+      
       <View style={styles.audioContainer}>
         {audios.length > 0 ? (
           <View style={styles.titleAndButtonContainer}>
+             <MaterialIcons style={styles.icon} name="graphic-eq" size={85} color="black" />
+
             <Text style={styles.filename}>{audios[playingIndex]?.filename}</Text>
             <TouchableOpacity
               onPress={handlePlayPause}
@@ -140,7 +143,7 @@ const FeedWithTopics = () => {
               <Ionicons
                 name={isPlaying ? 'pause' : 'play'}
                 size={40}
-                color="#FFF"
+                color="#000"
               />
             </TouchableOpacity>
           </View>
@@ -154,23 +157,27 @@ const FeedWithTopics = () => {
 
 const styles = StyleSheet.create({
   gestureContainer: {
-    flex: 1,
     width: Dimensions.get('window').width,
     height: Dimensions.get('window').height,
     justifyContent: 'flex-start',
     alignItems: 'center',
     backgroundColor: 'transparent',
     overflow: 'hidden',
+    
+    
   },
   topicsContainer: {
-    marginTop: 50,
+    marginTop: 0,
     marginBottom: 30,
-    backgroundColor: '#3CB371',
-    padding: 20,
-    borderRadius: 10,
+    backgroundColor: '#A9CD6F',
+    padding: 30,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    width: '80%',
+    width: '100%',
   },
   topicText: {
     color: '#000000',
@@ -181,8 +188,14 @@ const styles = StyleSheet.create({
     width: '80%',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 150,
-    height:200,
+    position: 'relative',
+    bottom: '35',
+    height: '65%',
+    width: Dimensions.get('window').width,
+    backgroundColor: '#BFE87A',
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,  
+   
     
   },
   titleAndButtonContainer: {
@@ -191,7 +204,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   filename: {
-    color: '#FFF',
+    color: '#00000',
     fontSize: 18,
     textAlign: 'center',
     marginBottom: 10,
@@ -204,6 +217,10 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 16,
   },
+  icon: {
+    marginBottom: 60,
+  
+  }
 });
 
 export default FeedWithTopics;

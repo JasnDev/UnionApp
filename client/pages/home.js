@@ -12,7 +12,9 @@ const Home = () => {
 
   return (
     <View style={styles.container}>
-      <Header />
+      
+      <Header /> {/* Cabeçalho */}
+      {/* Remover o ScrollView para evitar o conflito de rolagem */}
       <FeedWithTopics onCategoriaChange={handleCategoriaChange} />
     </View>
   );
@@ -21,7 +23,7 @@ const Home = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1, // Ocupa toda a tela
-    backgroundColor: '#403d39', // Cor de fundo geral
+    backgroundColor: '#E8F9CA', // Cor de fundo geral
   },
 });
 

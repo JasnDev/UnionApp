@@ -37,11 +37,11 @@ const Login = () => {
             const hashedPassword = await hashPassword(senha);
             if (hashedPassword) {
                 // Enviar dados para a API
-                const response = await axios.post('http://10.145.45.33:3030/login', {
+                const response = await axios.post('http://10.145.45.26:3030/login', {
                     email: email,
                     senha: hashedPassword  
                 }, {
-                    headers: { 'Content-Type': 'application/json' }
+                  headers: { 'Content-Type': 'application/json' }
                 });
 
                 // Salvar o token no AsyncStorage
@@ -93,7 +93,7 @@ const Login = () => {
                         )}
                     </Pressable>
                 </View>
-                
+
                 <Text style={styles.orText} accessibilityLabel="Entrar em sua conta com">Entrar com:</Text>
 
                 <View style={styles.socialContainer}>
@@ -106,9 +106,8 @@ const Login = () => {
                     </Pressable>
                 </View>
 
-                // Seção de Registrar, fixada no rodapé 
+                {/* Seção de Registrar, fixada no rodapé */}
                 <View style={styles.registerContainer}>
-                    
                     <Text style={styles.registerText}>Não tem uma conta? </Text>
                     <Pressable style={styles.registerButton} onPress={() => navigation.navigate("Register")}>
                         <Text style={styles.buttonresgisterText}>Registrar</Text>
@@ -146,8 +145,7 @@ const styles = StyleSheet.create({
         paddingLeft: 35,
     },
     input: {
-        width: 270,
-        height: 70,
+        width: '100%',
         paddingVertical: 18,
         paddingHorizontal: 40,
         fontSize: 16,
@@ -175,12 +173,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#fff',
         fontWeight: 'bold',
-    },
-    jump: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height:'10%'
     },
     orText: {
         fontSize: 16,
@@ -214,15 +206,12 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        position: 'relative',
-        top: 73,
         marginTop: 35,
     },
     registerText: {
         fontSize: 16,
         color: '#2F4F4F',
         padding: 10,
-        
     },
     buttonresgisterText: {
         fontSize: 16,

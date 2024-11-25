@@ -46,7 +46,7 @@ const Header = () => {
                         style={styles.iconButton}
                         onPress={() => navigation.navigate('post')}
                     >
-                        <AntDesign name="pluscircleo" size={35} color="#fff" />
+                        <AntDesign name="pluscircleo" size={35} color="#000" />
                     </Pressable>
                     <Pressable style={styles.iconButton} onPress={handleLogout}>
                         <Text style={styles.logoutText}>Sair</Text>
@@ -55,7 +55,7 @@ const Header = () => {
             ) : (
                 <View style={styles.iconCenter}>
                     <Pressable onPress={() => navigation.navigate('Login')}>
-                        <FontAwesome name="user-o" size={24} color="#fff" />
+                        <FontAwesome name="user-o" size={24} color="#000" />
                     </Pressable>
                 </View>
             )}
@@ -69,11 +69,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         paddingTop: 40,
-        paddingBottom: 15,
-        backgroundColor: '#403d39',
+        paddingBottom: 30,
+        backgroundColor: '#92B061',
         width: '100%',
         borderBottomWidth: 1,
         borderBottomColor: '#3d3b37',
+       
     },
     iconsContainer: {
         flexDirection: 'row',
@@ -82,9 +83,11 @@ const styles = StyleSheet.create({
     },
     iconButton: {
         marginHorizontal: 20,
+        
+        
     },
     logoutText: {
-        color: '#fff',
+        color: '#00000',
         fontSize: 16,
     },
     iconCenter: {

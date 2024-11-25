@@ -113,7 +113,7 @@ const Register = () => {
             ) : null}
 
             <Pressable style={styles.button} onPress={regi}>
-                <Text style={styles.buttonText}>Confirmar Registro</Text>
+                <Text style={styles.buttonText}>Registrar</Text>
             </Pressable>
         </View>
     );

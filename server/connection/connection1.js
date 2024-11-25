@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const address = process.env.IP;
+const address = process.env.ip;
 
 mongoose.connect(address, {
   useNewUrlParser: true,
