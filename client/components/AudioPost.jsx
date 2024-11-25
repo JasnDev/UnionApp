@@ -3,7 +3,9 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import * as FileSystem from 'expo-file-system';
 import React, { useEffect, useState } from 'react';
 import { Button, Pressable, Text, View, StyleSheet, Alert, Dimensions } from 'react-native';
-
+import Ionicons from '@expo/vector-icons/Ionicons';
+import Entypo from '@expo/vector-icons/Entypo';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons'; 
 const { width, height } = Dimensions.get('window');
 
 const AudioPost = () => {
@@ -11,7 +13,7 @@ const AudioPost = () => {
   const [recordingUri, setRecordingUri] = useState(null);
   const [sound, setSound] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [fileUrl, setFileUrl] = useState(null); 
+  const [fileUrl, setFileUrl] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
 
   const num = Math.random() * 100;
@@ -64,7 +66,7 @@ const AudioPost = () => {
 
     const file = {
       uri: fileUri,
-      type: 'audio/m4a', 
+      type: 'audio/m4a',
       name: `audio_file${num}.m4a`
     };
 
@@ -116,31 +118,34 @@ const AudioPost = () => {
     Audio.setAudioModeAsync({
       allowsRecordingIOS: true,
       playsInSilentModeIOS: true,
-      playThroughEarpieceAndroid: false, 
+      playThroughEarpieceAndroid: false,
       shouldDuckAndroid: true,
     }).catch((error) => console.error('Erro ao configurar modo de áudio:', error));
-  
+
     return sound ? () => sound.unloadAsync() : undefined;
   }, [sound]);
-  
-  
+
+
 
   return (
     <View accessible={true} accessibilityLabel='Página para criação de áudios.' style={styles.container}>
+      <MaterialIcons name="multitrack-audio" size={100} color="black" />
       <Pressable onPressIn={startRecording} onPressOut={stopRecording} >
-        <FontAwesome name="microphone" size={60} color={isRecording ? 'red' : 'black'} />
+        <Ionicons style={styles.iconStyle} name="mic-circle-outline" size={120} color="black" />
         {isRecording && <Text>Gravando...</Text>}
       </Pressable>
       {recordingUri ? (
         <>
-          <Button style={styles.pauseButton} title={isPlaying ? 'Pausar' : 'Tocar'} onPress={isPlaying ? pauseAudio : playAudio} />
+          <Pressable style={[ styles.pauseButton, isPlaying ? styles.playingButton : styles.pausedButton,]} onPress={isPlaying ? pauseAudio : playAudio}>
+            <Text style={styles.buttonText}>{isPlaying ? 'Pausar' : 'Tocar'}</Text>
+          </Pressable>
           {isPlaying ? <Text>Áudio em reprodução...</Text> : <Text>Áudio pausado</Text>}
         </>
       ) : (
         console.log('err')
       )}
       <Pressable onPress={save} style={styles.saveButton}>
-        <Text>Postar o áudio</Text>
+        <Text style={styles.styleText}>Postar o áudio</Text>
       </Pressable>
     </View>
   );
@@ -155,17 +160,43 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: width, // Usa a largura da janela
     height: height, // Usa a altura da janela
+    backgroundColor: '#E8F9CA',
+
   },
   saveButton: {
-    marginTop: 20,
-    padding: 10,
-    color: 'white',
-    backgroundColor: '#2196F3',
-    borderRadius: 5,
+    position: 'absolute', // Faz o botão ser posicionado de forma fixa
+    bottom: 50, // Margem da parte inferior da tela
+    width: '80%', // Define a largura para que fique bem visível
+    padding: 15, // Espessura interna do botão
+    backgroundColor: '#75943E', // Cor de fundo
+    borderRadius: 10, // Borda arredondada
+    alignItems: 'center', // Centraliza o texto dentro do botão
+    justifyContent: 'center', // Alinha verticalmente o texto
+
   },
   pauseButton: {
-    marginTop: 20,
-    padding: 10,
+    padding: 15,
+    width: '50%',
     borderRadius: 5,
+    backgroundColor: '#75943E',
+    marginBottom: 20,
+    color: '#fff',
+    alignItems: 'center', // Centraliza o conteúdo horizontalmente
+    justifyContent: 'center', // Centraliza o conteúdo verticalmente
+    height: 50, // Altura para garantir centralização vertical
+      marginBottom: 20,
+  },
+  styleText: {
+    color: '#fff',
+    fontSize: 18
+  },
+  buttonText: {
+    color: '#FFFFFF', // Cor do texto
+    fontSize: 16,     // Tamanho do texto
+    alignItems: 'center',
+  
+  },
+  iconStyle: {
+    marginTop: 50,
   }
 });

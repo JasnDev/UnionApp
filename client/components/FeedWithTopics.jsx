@@ -17,14 +17,14 @@ const FeedWithTopics = () => {
 
   useEffect(() => {
     const categoria = categories[index];  // Obtém o tópico atual com base no índice
-    let url = 'http://10.145.45.33:3030/audios';  // URL base para requisição
+    let url = 'http://10.145.45.26:3030/audios';  // URL base para requisição
 
     // Verifica se a categoria é "Todos", se for, não aplica filtro
     if (categoria !== 'Todos') {
       url += `?topico=${categoria}`;  // Adiciona o filtro para a categoria selecionada
     }
 
-    axios.get(`http://10.145.45.26:3030/audios?categoria=${categoria}`).get(url) // Filtro por tópico ou todos os áudios
+    axios.get(`http://10.145.45.26:3030/audios?categoria=${categoria}`) // Filtro por tópico ou todos os áudios
       .then((response) => {
         if (response.data.length === 0) {
           setAudios([]); // Caso não haja áudios para o tópico
@@ -195,8 +195,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#BFE87A',
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,  
-    marginTop: 150,
-    height:200,
+   
     
   },
   titleAndButtonContainer: {
