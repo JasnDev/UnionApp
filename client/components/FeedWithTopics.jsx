@@ -18,13 +18,14 @@ const FeedWithTopics = () => {
   useEffect(() => {
     const categoria = categories[index];  // Obtém o tópico atual com base no índice
     let url = 'http://10.145.45.26:3030/audios';  // URL base para requisição
-
+  
     // Verifica se a categoria é "Todos", se for, não aplica filtro
     if (categoria !== 'Todos') {
       url += `?topico=${categoria}`;  // Adiciona o filtro para a categoria selecionada
     }
-
-    axios.get(`http://10.145.45.26:3030/audios?categoria=${categoria}`) // Filtro por tópico ou todos os áudios
+  
+    // Agora a URL está corretamente formada, incluindo o filtro de categoria
+    axios.get(url) // Utiliza a URL com o filtro
       .then((response) => {
         if (response.data.length === 0) {
           setAudios([]); // Caso não haja áudios para o tópico

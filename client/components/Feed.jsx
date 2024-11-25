@@ -15,7 +15,7 @@ const Feed = ({ categoria }) => {
 
   useEffect(() => {
     axios
-      .get(`http://10.145.45.26:3030/audios?categoria=${categoria}`)
+      .get(`http://10.145.45.33:3030/audios?categoria=${categoria}`)
       .then((response) => {
         const audioData = response.data.map((item, index) => ({
           id: index.toString(),

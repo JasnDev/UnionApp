@@ -20,7 +20,7 @@ const getAllAudios = async (req, res) => {
 
     await cursor.forEach((file) => {
       const fileSizeInMB = (file.length / (1024 * 1024)).toFixed(2);
-      const audioUrl = `http://10.145.45.26:3030/audio/${file.filename}`;
+      const audioUrl = `http://10.145.45.33:3030/audio/${file.filename}`;
       
       audios.push({
         filename: file.filename,
@@ -28,7 +28,7 @@ const getAllAudios = async (req, res) => {
         sizeMB: fileSizeInMB,
         uploadDate: file.uploadDate,
         contentType: file.contentType,
-        url: `http://10.145.45.26:3030/audio/${file.filename}`  // Incluindo a URL completa
+        url: `http://10.145.45.33:3030/audio/${file.filename}`  // Incluindo a URL completa
       });
     });
 
@@ -37,7 +37,7 @@ const getAllAudios = async (req, res) => {
       const allAudios = [];
       await cursorAll.forEach((file) => {
         const fileSizeInMB = (file.length / (1024 * 1024)).toFixed(2);
-        const audioUrl = `http://10.145.45.26:3030/audio/${file.filename}`;
+        const audioUrl = `http://10.145.45.33:3030/audio/${file.filename}`;
         
         allAudios.push({
           filename: file.filename,
