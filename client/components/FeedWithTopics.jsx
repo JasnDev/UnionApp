@@ -6,41 +6,43 @@ import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+
 const FeedWithTopics = () => {
-  const categories = ['Todos', 'Música', 'Games', 'Culinaria', 'Engraçados'];  // Adiciona a opção "Todos"
-  const [index, setIndex] = useState(0);  // Índice inicial é 0, ou seja, "Todos"
+  const categories = ['Todos', 'Música', 'Games', 'Culinaria', 'Engraçados']; // Add the "Todos" option
+  const [index, setIndex] = useState(0); // Initial index is 0, which means "Todos"
   const [audios, setAudios] = useState([]);
   const [currentSound, setCurrentSound] = useState(null);
   const [playingIndex, setPlayingIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const isFocused = useIsFocused(); // Verifica se a tela está em foco
+  const isFocused = useIsFocused(); // Check if the screen is focused
 
   useEffect(() => {
-    const categoria = categories[index];  // Obtém o tópico atual com base no índice
-    let url = 'http://10.145.45.26:3030/audios';  // URL base para requisição
-  
-    // Verifica se a categoria é "Todos", se for, não aplica filtro
+    const categoria = categories[index]; // Get the current topic based on the index
+    let url = 'http://10.145.45.50:3030/audios'; // Base URL for the request
+
+    // If the category is not "Todos", apply a filter for the selected category
     if (categoria !== 'Todos') {
-      url += `?topico=${categoria}`;  // Adiciona o filtro para a categoria selecionada
+      url += `?topico=${categoria}`;
     }
-  
-    // Agora a URL está corretamente formada, incluindo o filtro de categoria
-    axios.get(url) // Utiliza a URL com o filtro
+
+    // Make the API request with the URL
+    axios.get(url)
       .then((response) => {
         if (response.data.length === 0) {
-          setAudios([]); // Caso não haja áudios para o tópico
+          setAudios([]); // If no audio for the topic
         } else {
           setAudios(response.data);
-          AudioPlay(response.data[0].url, 0); // Toca o primeiro áudio ao carregar
+          AudioPlay(response.data[0].url, 0); // Play the first audio when data is loaded
         }
       })
       .catch((error) => {
-        console.error('Erro na requisição:', error.response || error.message);
-        setAudios([]); // Garantir que o estado fique vazio em caso de erro
+        console.error('Error in request:', error.response || error.message);
+        setAudios([]); // Ensure the state is empty in case of an error
       });
   }, [index]);
 
   useEffect(() => {
+    // Handle if the screen is focused or not
     if (isFocused) {
       if (audios.length > 0) {
         AudioPlay(audios[playingIndex]?.url, playingIndex);
@@ -58,30 +60,31 @@ const FeedWithTopics = () => {
 
   const AudioPlay = async (uri, index) => {
     if (currentSound) {
+      // Stop and unload any currently playing audio before playing a new one
       await currentSound.stopAsync();
-      await currentSound.unloadAsync(); // Descarregar o áudio anterior
+      await currentSound.unloadAsync();
     }
-  
+
     try {
       const { sound } = await Audio.Sound.createAsync(
         { uri },
         { shouldPlay: true, isLooping: true }
       );
-  
       setCurrentSound(sound);
       setPlayingIndex(index);
       setIsPlaying(true);
-  
+
       sound.setOnPlaybackStatusUpdate((status) => {
         setIsPlaying(status.isPlaying);
       });
     } catch (error) {
-      console.error('Erro ao reproduzir o áudio:', error);
+      console.error('Error while playing audio:', error);
     }
   };
-  
+
   const AudioPause = async () => {
     if (currentSound) {
+      // Pause audio only if it is currently playing
       await currentSound.pauseAsync();
       setIsPlaying(false);
     }
@@ -97,18 +100,18 @@ const FeedWithTopics = () => {
 
   const handleSwipeDown = () => {
     const nextIndex = (index + 1) % categories.length;
-    setIndex(nextIndex);
+    setIndex(nextIndex); // Cycle through the categories
   };
 
   const handleSwipeLeft = () => {
     if (playingIndex < audios.length - 1) {
-      AudioPlay(audios[playingIndex + 1]?.url, playingIndex + 1);
+      AudioPlay(audios[playingIndex + 1]?.url, playingIndex + 1); // Go to the next audio
     }
   };
-  
+
   const handleSwipeRight = () => {
     if (playingIndex > 0) {
-      AudioPlay(audios[playingIndex - 1]?.url, playingIndex - 1);
+      AudioPlay(audios[playingIndex - 1]?.url, playingIndex - 1); // Go to the previous audio
     }
   };
 
@@ -130,22 +133,13 @@ const FeedWithTopics = () => {
       <View style={styles.topicsContainer}>
         <Text style={styles.topicText}>{categories[index]}</Text>
       </View>
-      
       <View style={styles.audioContainer}>
         {audios.length > 0 ? (
           <View style={styles.titleAndButtonContainer}>
-             <MaterialIcons style={styles.icon} name="graphic-eq" size={85} color="black" />
-
+            <MaterialIcons style={styles.icon} name="graphic-eq" size={85} color="black" />
             <Text style={styles.filename}>{audios[playingIndex]?.filename}</Text>
-            <TouchableOpacity
-              onPress={handlePlayPause}
-              style={styles.playPauseButtonContainer}
-            >
-              <Ionicons
-                name={isPlaying ? 'pause' : 'play'}
-                size={40}
-                color="#000"
-              />
+            <TouchableOpacity onPress={handlePlayPause} style={styles.playPauseButtonContainer}>
+              <Ionicons name={isPlaying ? 'pause' : 'play'} size={40} color="#000" />
             </TouchableOpacity>
           </View>
         ) : (
@@ -164,8 +158,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'transparent',
     overflow: 'hidden',
-    
-    
   },
   topicsContainer: {
     marginTop: 0,
@@ -195,9 +187,7 @@ const styles = StyleSheet.create({
     width: Dimensions.get('window').width,
     backgroundColor: '#BFE87A',
     borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,  
-   
-    
+    borderBottomRightRadius: 30,
   },
   titleAndButtonContainer: {
     flexDirection: 'column',
@@ -220,7 +210,6 @@ const styles = StyleSheet.create({
   },
   icon: {
     marginBottom: 60,
-  
   }
 });
 

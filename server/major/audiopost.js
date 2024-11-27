@@ -3,6 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import createGridFSBucket from '../connection/connection2.js';
 
+// Obter o diretório atual do arquivo
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Middleware para enviar arquivos de áudio para o bucket do GridFS
@@ -11,67 +12,56 @@ const uploadAudio = async (req, res) => {
     // Cria o GridFSBucket a partir da conexão existente
     const bucket = createGridFSBucket();
 
-    // Caminho da pasta 'uploads'
-    const folderPath = path.join(__dirname, '../uploads');
+    const { topic } = req.body;  // Aqui estamos pegando o tópico
+    const audio = req.file;  // O arquivo vem de req.file (usando multer)
 
-    // Verifica se a pasta 'uploads' existe
-    if (!fs.existsSync(folderPath)) {
-      console.error('A pasta "uploads" não existe.');
-      return res.status(400).json({ error: 'A pasta "uploads" não existe.' });
+    if (!audio || !topic) {
+      return res.status(400).json({ error: 'Arquivo e tópico são obrigatórios.' });
     }
 
-    // Lê todos os arquivos na pasta 'uploads'
-    const files = fs.readdirSync(folderPath);
+    // Caminho completo do arquivo enviado na pasta uploads
+    const audioPath = path.join(__dirname, '../uploads', audio.filename);  // Ajustado para apontar para o arquivo específico
 
-    if (files.length === 0) {
-      console.log('Não há arquivos para enviar.');
-      return res.status(400).json({ error: 'Nenhum arquivo encontrado na pasta' });
+    // Verificar se o arquivo realmente existe
+    if (!fs.existsSync(audioPath)) {
+      return res.status(404).json({ error: 'Arquivo não encontrado.' });
     }
 
-    for (const file of files) {
-      const filePath = path.join(folderPath, file);
+    // Determina o tipo do arquivo com base na extensão
+    const extname = path.extname(audio.originalname).toLowerCase();
+    const mimeType = extname === '.mp3' ? 'audio/mpeg' : 'audio/m4a'; // Adicione mais tipos conforme necessário
 
-      // Verifica se o arquivo realmente existe
-      if (fs.existsSync(filePath)) {
-        console.log(`Enviando arquivo: ${file}`);
+    console.log(`Tipo de conteúdo: ${mimeType}`);
 
-        const fileStream = fs.createReadStream(filePath);
+    // Cria o stream de upload para o GridFS, incluindo o tópico como metadado
+    const uploadStream = bucket.openUploadStream(audio.originalname, {
+      contentType: mimeType,
+      metadata: { topicos: [topic] }  // Aqui estamos colocando o tópico no metadata
+    });
 
-        // Determina o tipo do arquivo com base na extensão
-        const extname = path.extname(file).toLowerCase();
-        const mimeType = extname === '.mp3' ? 'audio/mpeg' : 'audio/m4a'; // Adicione mais tipos conforme necessário
+    // Cria o stream de leitura do arquivo
+    const fileStream = fs.createReadStream(audioPath);
 
-        console.log(`Tipo de conteúdo: ${mimeType}`);
+    // Pipe o arquivo para o GridFS
+    fileStream.pipe(uploadStream)
+      .on('finish', () => {
+        console.log(`Arquivo ${audio.originalname} enviado com sucesso para o MongoDB`);
 
-        // Cria o stream de upload para o GridFS
-        const uploadStream = bucket.openUploadStream(file, {
-          contentType: mimeType,
+        // Opcional: Remover o arquivo local após o upload, se necessário
+        fs.unlink(audioPath, (unlinkErr) => {
+          if (unlinkErr) {
+            console.error('Erro ao remover o arquivo local:', unlinkErr);
+          } else {
+            console.log(`Arquivo local ${audio.originalname} removido com sucesso.`);
+          }
         });
 
-        // Envia o arquivo para o GridFS e lida com eventos
-        fileStream.pipe(uploadStream)
-          .on('finish', () => {
-            console.log(`Arquivo ${file} enviado com sucesso para o MongoDB`);
-            // Remove o arquivo local após o upload
-            fs.unlink(filePath, (unlinkErr) => {
-              if (unlinkErr) {
-                console.error('Erro ao remover o arquivo local:', unlinkErr);
-              } else {
-                console.log(`Arquivo local ${file} removido com sucesso.`);
-              }
-            });
-          })
-          .on('error', (error) => {
-            console.error(`Erro ao enviar o arquivo ${file} para o MongoDB:`, error);
-            res.status(500).json({ error: `Erro ao enviar o arquivo ${file}` });
-          });
-      } else {
-        console.error(`Arquivo não encontrado: ${file}`);
-      }
-    }
-
-    // Responde com sucesso após todos os arquivos serem enviados
-    res.status(200).json({ message: 'Arquivos enviados com sucesso!' });
+        res.status(200).json({ message: 'Áudio enviado com sucesso!' });
+      })
+      .on('error', (error) => {
+        console.error(`Erro ao enviar o arquivo ${audio.originalname} para o MongoDB:`, error);
+        res.status(500).json({ error: `Erro ao enviar o arquivo ${audio.originalname}` });
+      });
   } catch (error) {
     console.error('Erro ao enviar arquivos para o MongoDB:', error);
     res.status(500).json({ error: 'Erro ao enviar arquivos para o MongoDB' });

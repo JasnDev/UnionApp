@@ -54,7 +54,7 @@ const Register = () => {
             // Gerando o hash da senha
             hashPassword(senha).then((hashedPassword) => {
                 if (hashedPassword) {
-                    axios.post('http://10.145.45.33:3030/registro', {
+                    axios.post('http://10.145.45.50:3030/registro', {
                         nome: nome,
                         email: email,
                         senha: hashedPassword
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
         marginBottom: 40,
     },
     input: {
-        width: 270,
+        width: 300,
         height: 70,
         paddingVertical: 15,
         paddingHorizontal: 20,

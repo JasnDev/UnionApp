@@ -37,7 +37,7 @@ const Login = () => {
             const hashedPassword = await hashPassword(senha);
             if (hashedPassword) {
                 // Enviar dados para a API
-                const response = await axios.post('http://10.145.45.33:3030/login', {
+                const response = await axios.post('http://10.145.45.50:3030/login', {
                     email: email,
                     senha: hashedPassword  
                 }, {
@@ -145,7 +145,8 @@ const styles = StyleSheet.create({
         paddingLeft: 35,
     },
     input: {
-        width: '100%',
+        width: 300,
+        height: 70,
         paddingVertical: 18,
         paddingHorizontal: 40,
         fontSize: 16,
