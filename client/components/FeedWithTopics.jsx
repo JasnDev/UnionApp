@@ -8,7 +8,7 @@ import { useNavigation, useIsFocused } from '@react-navigation/native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 const FeedWithTopics = () => {
-  const categories = ['Todos', 'Música', 'Games', 'Culinaria', 'Engraçados']; // Add the "Todos" option
+  const categories = ['Todos', 'Música', 'Games', 'Culinária', 'Engraçados']; // Add the "Todos" option
   const [index, setIndex] = useState(0); // Initial index is 0, which means "Todos"
   const [audios, setAudios] = useState([]);
   const [currentSound, setCurrentSound] = useState(null);
@@ -18,7 +18,7 @@ const FeedWithTopics = () => {
 
   useEffect(() => {
     const categoria = categories[index]; // Get the current topic based on the index
-    let url = 'http://10.145.45.50:3030/audios'; // Base URL for the request
+    let url = 'http://10.0.0.225:3030/audios'; // Base URL for the request
 
     // If the category is not "Todos", apply a filter for the selected category
     if (categoria !== 'Todos') {
