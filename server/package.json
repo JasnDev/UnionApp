@@ -4,29 +4,21 @@
   "main": "app.js",
   "type": "module",
   "scripts": {
+    "start": "node app.js",
     "dev": "nodemon app.js"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "bcrypt": "^5.1.1",
-    "bcryptjs": "^2.4.3",
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "ejs": "^3.1.10",
-    "express": "^4.21.1",
-    "express-formidable": "^1.2.0",
-    "fs": "^0.0.1-security",
-    "gridfs": "^1.0.0",
-    "gridfs-stream": "^1.1.1",
-    "jsonwebtoken": "^9.0.2",
-    "mongodb": "^6.10.0",
-    "mongoose": "^8.8.1",
-    "multer": "^1.4.4",
-    "multer-gridfs-storage": "^5.0.2",
-    "nodemon": "^3.1.7",
-    "path": "^0.12.7",
-    "streamifier": "^0.1.1"
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongodb": "^7.5.0",
+    "mongoose": "^9.9.3",
+    "multer": "^2.2.0",
+    "nodemon": "^3.1.14"
   }
 }

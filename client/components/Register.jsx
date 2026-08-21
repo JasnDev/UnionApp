@@ -12,7 +12,7 @@ const Register = () => {
     const [error, setError] = useState('');
 
     const navigation = useNavigation();
-
+        //teste git
     // Função de hash da senha
     const hashPassword = async (senha) => {
         try {

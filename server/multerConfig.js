@@ -1,17 +1,20 @@
 import multer from 'multer';
+import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Definindo o armazenamento para o multer
+const uploadDirectory = path.join(path.dirname(fileURLToPath(import.meta.url)), 'uploads');
+fs.mkdirSync(uploadDirectory, { recursive: true });
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, './uploads');  // Pasta onde os arquivos serão temporariamente armazenados
+    cb(null, uploadDirectory);
   },
   filename: (req, file, cb) => {
-    cb(null, file.fieldname + Date.now() + path.extname(file.originalname));  // Definindo um nome único para o arquivo
+    cb(null, file.fieldname + Date.now() + path.extname(file.originalname));
   }
 });
 
-// Criando o middleware de upload
-const upload = multer({ storage: storage });
+const upload = multer({ storage });
 
 export default upload;

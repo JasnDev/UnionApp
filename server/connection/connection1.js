@@ -5,10 +5,7 @@ dotenv.config();
 
 const address = process.env.ip;
 
-mongoose.connect(address, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+mongoose.connect(address)
   .then(() => console.log('Conectado ao MongoDB com sucesso'))
   .catch(err => console.error('Erro ao conectar ao MongoDB:', err));
 

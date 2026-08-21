@@ -1,2 +1,3 @@
-cd server
-node --env-file=config.env server
+@echo off
+cd /d "%~dp0server"
+npm run dev
