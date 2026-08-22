@@ -94,17 +94,8 @@ const Login = () => {
                     </Pressable>
                 </View>
 
-                <Text style={styles.orText} accessibilityLabel="Entrar em sua conta com">Entrar com:</Text>
 
-                <View style={styles.socialContainer}>
-                    <Pressable style={[styles.socialButton, styles.googleButton]}>
-                        <Text style={styles.socialText}>Google</Text>
-                    </Pressable>
-
-                    <Pressable style={[styles.socialButton, styles.facebookButton]}>
-                        <Text style={styles.socialText}>Facebook</Text>
-                    </Pressable>
-                </View>
+               
 
                 {/* Seção de Registrar, fixada no rodapé */}
                 <View style={styles.registerContainer}>
