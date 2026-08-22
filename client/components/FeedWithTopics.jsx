@@ -18,7 +18,7 @@ const FeedWithTopics = () => {
 
   useEffect(() => {
     const categoria = categories[index]; // Get the current topic based on the index
-    let url = 'http://10.0.0.225:3030/audios'; // Base URL for the request
+    let url = 'http://10.0.0.61:3030/audios'; // Base URL for the request
 
     // If the category is not "Todos", apply a filter for the selected category
     if (categoria !== 'Todos') {
@@ -32,6 +32,7 @@ const FeedWithTopics = () => {
           setAudios([]); // If no audio for the topic
         } else {
           setAudios(response.data);
+          
           AudioPlay(response.data[0].url, 0); // Play the first audio when data is loaded
         }
       })
@@ -70,6 +71,7 @@ const FeedWithTopics = () => {
         { uri },
         { shouldPlay: true, isLooping: true }
       );
+      console.log(uri)
       setCurrentSound(sound);
       setPlayingIndex(index);
       setIsPlaying(true);
@@ -79,6 +81,7 @@ const FeedWithTopics = () => {
       });
     } catch (error) {
       console.error('Error while playing audio:', error);
+       console.log(uri)
     }
   };
 
