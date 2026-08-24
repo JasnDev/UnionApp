@@ -1,219 +1,387 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import {
+    ActivityIndicator,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
 import GestureRecognizer from 'react-native-swipe-gestures';
 import { Audio } from 'expo-av';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation, useIsFocused } from '@react-navigation/native';
+import { useIsFocused } from '@react-navigation/native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
-const FeedWithTopics = () => {
-  const categories = ['Todos', 'Música', 'Games', 'Culinária', 'Engraçados']; // Add the "Todos" option
-  const [index, setIndex] = useState(0); // Initial index is 0, which means "Todos"
-  const [audios, setAudios] = useState([]);
-  const [currentSound, setCurrentSound] = useState(null);
-  const [playingIndex, setPlayingIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const isFocused = useIsFocused(); // Check if the screen is focused
+const BASE_URL = 'http://10.0.0.61:3030/audios';
 
-  useEffect(() => {
-    const categoria = categories[index]; // Get the current topic based on the index
-    let url = 'http://10.0.0.61:3030/audios'; // Base URL for the request
+const CATEGORIES = ['Todos', 'Música', 'Games', 'Culinária', 'Engraçados'];
 
-    // If the category is not "Todos", apply a filter for the selected category
-    if (categoria !== 'Todos') {
-      url += `?topico=${categoria}`;
-    }
-
-    // Make the API request with the URL
-    axios.get(url)
-      .then((response) => {
-        if (response.data.length === 0) {
-          setAudios([]); // If no audio for the topic
-        } else {
-          setAudios(response.data);
-          
-          AudioPlay(response.data[0].url, 0); // Play the first audio when data is loaded
-        }
-      })
-      .catch((error) => {
-        console.error('Error in request:', error.response || error.message);
-        setAudios([]); // Ensure the state is empty in case of an error
-      });
-  }, [index]);
-
-  useEffect(() => {
-    // Handle if the screen is focused or not
-    if (isFocused) {
-      if (audios.length > 0) {
-        AudioPlay(audios[playingIndex]?.url, playingIndex);
-      }
-    } else {
-      AudioPause();
-    }
-
-    return () => {
-      if (!isFocused) {
-        AudioPause();
-      }
-    };
-  }, [isFocused]);
-
-  const AudioPlay = async (uri, index) => {
-    if (currentSound) {
-      // Stop and unload any currently playing audio before playing a new one
-      await currentSound.stopAsync();
-      await currentSound.unloadAsync();
-    }
-
-    try {
-      const { sound } = await Audio.Sound.createAsync(
-        { uri },
-        { shouldPlay: true, isLooping: true }
-      );
-      console.log(uri)
-      setCurrentSound(sound);
-      setPlayingIndex(index);
-      setIsPlaying(true);
-
-      sound.setOnPlaybackStatusUpdate((status) => {
-        setIsPlaying(status.isPlaying);
-      });
-    } catch (error) {
-      console.error('Error while playing audio:', error);
-       console.log(uri)
-    }
-  };
-
-  const AudioPause = async () => {
-    if (currentSound) {
-      // Pause audio only if it is currently playing
-      await currentSound.pauseAsync();
-      setIsPlaying(false);
-    }
-  };
-
-  const handlePlayPause = () => {
-    if (isPlaying) {
-      AudioPause();
-    } else {
-      AudioPlay(audios[playingIndex]?.url, playingIndex);
-    }
-  };
-
-  const handleSwipeDown = () => {
-    const nextIndex = (index + 1) % categories.length;
-    setIndex(nextIndex); // Cycle through the categories
-  };
-
-  const handleSwipeLeft = () => {
-    if (playingIndex < audios.length - 1) {
-      AudioPlay(audios[playingIndex + 1]?.url, playingIndex + 1); // Go to the next audio
-    }
-  };
-
-  const handleSwipeRight = () => {
-    if (playingIndex > 0) {
-      AudioPlay(audios[playingIndex - 1]?.url, playingIndex - 1); // Go to the previous audio
-    }
-  };
-
-  const config = {
+const SWIPE_CONFIG = {
     velocityThreshold: 0.5,
     directionalOffsetThreshold: 80,
-  };
-
-  return (
-    <GestureRecognizer
-      onSwipeDown={handleSwipeDown}
-      onSwipeLeft={handleSwipeLeft}
-      onSwipeRight={handleSwipeRight}
-      config={config}
-      style={styles.gestureContainer}
-      scrollEnabled={false}
-    >
-      <View style={styles.backgroundContainer}></View>
-      <View style={styles.topicsContainer}>
-        <Text style={styles.topicText}>{categories[index]}</Text>
-      </View>
-      <View style={styles.audioContainer}>
-        {audios.length > 0 ? (
-          <View style={styles.titleAndButtonContainer}>
-            <MaterialIcons style={styles.icon} name="graphic-eq" size={85} color="black" />
-            <Text style={styles.filename}>{audios[playingIndex]?.filename}</Text>
-            <TouchableOpacity onPress={handlePlayPause} style={styles.playPauseButtonContainer}>
-              <Ionicons name={isPlaying ? 'pause' : 'play'} size={40} color="#000" />
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <Text style={styles.noAudioMessage}>Nenhum áudio disponível</Text>
-        )}
-      </View>
-    </GestureRecognizer>
-  );
 };
 
+const FeedWithTopics = () => {
+    const [categoryIndex, setCategoryIndex] = useState(0);
+    const [audios, setAudios] = useState([]);
+    const [playingIndex, setPlayingIndex] = useState(0);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [hasError, setHasError] = useState(false);
+
+    const isFocused = useIsFocused();
+
+    // soundRef guarda o objeto de áudio atual de forma síncrona.
+    // Usar apenas useState aqui causa condição de corrida: se o usuário
+    // trocar de faixa rapidamente (swipe), o setState ainda não refletiu
+    // o novo valor quando a próxima chamada de AudioPlay dispara, e o
+    // som anterior nunca é parado/descarregado (ficava tocando por baixo).
+    const soundRef = useRef(null);
+
+    // Guarda os áudios e o índice atual em refs também, para que o efeito
+    // de foco (isFocused) sempre veja o valor mais recente sem precisar
+    // recriar o efeito a cada mudança de estado.
+    const audiosRef = useRef(audios);
+    const playingIndexRef = useRef(playingIndex);
+    useEffect(() => {
+        audiosRef.current = audios;
+    }, [audios]);
+    useEffect(() => {
+        playingIndexRef.current = playingIndex;
+    }, [playingIndex]);
+
+    const unloadCurrentSound = useCallback(async () => {
+        if (soundRef.current) {
+            try {
+                await soundRef.current.stopAsync();
+                await soundRef.current.unloadAsync();
+            } catch (error) {
+                console.warn('Erro ao descarregar áudio anterior:', error);
+            }
+            soundRef.current = null;
+        }
+    }, []);
+
+    const AudioPlay = useCallback(async (uri, index) => {
+        if (!uri) {
+            console.warn('URI de áudio inválida ou vazia.');
+            return;
+        }
+
+        await unloadCurrentSound();
+
+        try {
+            const { sound } = await Audio.Sound.createAsync(
+                { uri },
+                { shouldPlay: true, isLooping: true }
+            );
+            soundRef.current = sound;
+            setPlayingIndex(index);
+            setIsPlaying(true);
+
+            sound.setOnPlaybackStatusUpdate((status) => {
+                if (status.isLoaded) {
+                    setIsPlaying(status.isPlaying);
+                }
+            });
+        } catch (error) {
+            console.error('Erro ao reproduzir áudio:', error, 'URI:', uri);
+        }
+    }, [unloadCurrentSound]);
+
+    const AudioPause = useCallback(async () => {
+        if (soundRef.current) {
+            await soundRef.current.pauseAsync();
+            setIsPlaying(false);
+        }
+    }, []);
+
+    // Busca os áudios sempre que a categoria mudar
+    useEffect(() => {
+        let cancelled = false;
+        const categoria = CATEGORIES[categoryIndex];
+        let url = BASE_URL;
+        if (categoria !== 'Todos') {
+            url += `?topico=${encodeURIComponent(categoria)}`;
+        }
+
+        setIsLoading(true);
+        setHasError(false);
+
+        axios
+            .get(url)
+            .then((response) => {
+                if (cancelled) return;
+                const data = response.data || [];
+                setAudios(data);
+                setPlayingIndex(0);
+                if (data.length > 0) {
+                    AudioPlay(data[0].url, 0);
+                } else {
+                    unloadCurrentSound();
+                }
+            })
+            .catch((error) => {
+                if (cancelled) return;
+                console.error('Erro ao buscar áudios:', error.response || error.message);
+                setAudios([]);
+                setHasError(true);
+                unloadCurrentSound();
+            })
+            .finally(() => {
+                if (!cancelled) setIsLoading(false);
+            });
+
+        return () => {
+            cancelled = true;
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [categoryIndex]);
+
+    // Pausa/retoma o áudio conforme a tela ganha ou perde foco.
+    useEffect(() => {
+        if (isFocused) {
+            const currentAudios = audiosRef.current;
+            const currentIndex = playingIndexRef.current;
+            if (currentAudios.length > 0) {
+                AudioPlay(currentAudios[currentIndex]?.url, currentIndex);
+            }
+        } else {
+            AudioPause();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isFocused]);
+
+    // Descarrega o áudio ao desmontar o componente
+    useEffect(() => {
+        return () => {
+            unloadCurrentSound();
+        };
+    }, [unloadCurrentSound]);
+
+    const handlePlayPause = () => {
+        if (isPlaying) {
+            AudioPause();
+        } else {
+            AudioPlay(audios[playingIndex]?.url, playingIndex);
+        }
+    };
+
+    const handleSwipeDown = () => {
+        setCategoryIndex((prev) => (prev + 1) % CATEGORIES.length);
+    };
+
+    const handleSwipeLeft = () => {
+        if (playingIndex < audios.length - 1) {
+            AudioPlay(audios[playingIndex + 1]?.url, playingIndex + 1);
+        }
+    };
+
+    const handleSwipeRight = () => {
+        if (playingIndex > 0) {
+            AudioPlay(audios[playingIndex - 1]?.url, playingIndex - 1);
+        }
+     
+    };
+
+    return (
+
+      <GestureRecognizer
+            onSwipeDown={handleSwipeDown}
+            onSwipeLeft={handleSwipeLeft}
+            onSwipeRight={handleSwipeRight}
+            config={SWIPE_CONFIG}
+            style={styles.gestureContainer}
+            scrollEnabled={false}
+        >
+  <View style={styles.gridOverlay} pointerEvents="none" />
+
+            <View style={styles.topicsContainer}>
+                <View style={styles.topicPill}>
+                    <Text style={styles.topicText}>{CATEGORIES[categoryIndex]}</Text>
+                </View>
+                <Text style={styles.swipeDownHint}>↓ deslize para trocar de tópico</Text>
+            </View>
+
+            <View style={styles.audioContainer}>
+                {isLoading ? (
+                    <View style={styles.centered}>
+                        <ActivityIndicator size="large" color="#00F0FF" />
+                        <Text style={styles.loadingText}>CARREGANDO...</Text>
+                    </View>
+                ) : hasError ? (
+                    <View style={styles.centered}>
+                        <Ionicons name="cloud-offline-outline" size={48} color="#3E5468" />
+                        <Text style={styles.noAudioMessage}>Não foi possível carregar os áudios</Text>
+                    </View>
+                ) : audios.length > 0 ? (
+                    <View style={styles.titleAndButtonContainer}>
+                        <View style={styles.iconRing}>
+                            <MaterialIcons name="graphic-eq" size={70} color="#00F0FF" />
+                        </View>
+                        <Text style={styles.filename} numberOfLines={1}>
+                            {audios[playingIndex]?.filename}
+                        </Text>
+                        <Text style={styles.trackCounter}>
+                            {playingIndex + 1} / {audios.length}
+                        </Text>
+
+                        <TouchableOpacity
+                            onPress={handlePlayPause}
+                            style={styles.playPauseButton}
+                        >
+                            <Ionicons
+                                name={isPlaying ? 'pause' : 'play'}
+                                size={36}
+                                color="#0B0F1A"
+                            />
+                        </TouchableOpacity>
+
+                        <View style={styles.swipeHints}>
+                            <Text style={styles.swipeHintText}>← ANTERIOR</Text>
+                            <Text style={styles.swipeHintText}>PRÓXIMO →</Text>
+                        </View>
+                    </View>
+                ) : (
+                    <View style={styles.centered}>
+                        <Ionicons name="musical-notes-outline" size={48} color="#3E5468" />
+                        <Text style={styles.noAudioMessage}>Nenhum áudio disponível</Text>
+                    </View>
+                )}
+            </View>
+        </GestureRecognizer>
+    );
+};
+
+const NEON = '#00F0FF';
+const BG = '#0B0F1A';
+const PANEL = '#121826';
+const BORDER = '#1E2A3D';
+
 const styles = StyleSheet.create({
-  gestureContainer: {
-    width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-    overflow: 'hidden',
-  },
-  topicsContainer: {
-    marginTop: 0,
-    marginBottom: 30,
-    backgroundColor: '#A9CD6F',
-    padding: 30,
-    borderTopLeftRadius: 0,
-    borderTopRightRadius: 0,
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-  },
-  topicText: {
-    color: '#000000',
-    fontSize: 18,
-    textAlign: 'center',
-  },
-  audioContainer: {
-    width: '80%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-    bottom: '35',
-    height: '65%',
-    width: Dimensions.get('window').width,
-    backgroundColor: '#BFE87A',
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-  },
-  titleAndButtonContainer: {
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  filename: {
-    color: '#00000',
-    fontSize: 18,
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  playPauseButtonContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  noAudioMessage: {
-    color: '#FFF',
-    fontSize: 16,
-  },
-  icon: {
-    marginBottom: 60,
-  }
+    gestureContainer: {
+        flex: 1,
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        backgroundColor: BG,
+    },
+    gridOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        borderColor: BORDER,
+        opacity: 0.5,
+    },
+    topicsContainer: {
+        width: '100%',
+        paddingTop: 50,
+        paddingBottom: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: PANEL,
+        borderBottomLeftRadius: 20,
+        borderBottomRightRadius: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: BORDER,
+    },
+    topicPill: {
+        borderWidth: 1,
+        borderColor: NEON,
+        borderRadius: 20,
+        paddingVertical: 8,
+        paddingHorizontal: 22,
+        marginBottom: 8,
+    },
+    topicText: {
+        color: NEON,
+        fontSize: 16,
+        fontWeight: '700',
+        letterSpacing: 1.5,
+        textAlign: 'center',
+    },
+    swipeDownHint: {
+        color: '#4C5D73',
+        fontSize: 11,
+        letterSpacing: 0.5,
+    },
+    audioContainer: {
+        flex: 1,
+        width: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    centered: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    loadingText: {
+        color: '#4C5D73',
+        fontSize: 12,
+        letterSpacing: 2,
+        marginTop: 12,
+    },
+    titleAndButtonContainer: {
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '85%',
+    },
+    iconRing: {
+        width: 130,
+        height: 130,
+        borderRadius: 65,
+        borderWidth: 1,
+        borderColor: NEON,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 24,
+        backgroundColor: PANEL,
+        shadowColor: NEON,
+        shadowOpacity: 0.5,
+        shadowRadius: 20,
+        shadowOffset: { width: 0, height: 0 },
+    },
+    filename: {
+        color: '#E6F7FA',
+        fontSize: 17,
+        textAlign: 'center',
+        marginBottom: 4,
+        maxWidth: '100%',
+    },
+    trackCounter: {
+        color: '#4C5D73',
+        fontSize: 12,
+        letterSpacing: 1,
+        marginBottom: 26,
+    },
+    playPauseButton: {
+        width: 76,
+        height: 76,
+        borderRadius: 38,
+        backgroundColor: NEON,
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: NEON,
+        shadowOpacity: 0.7,
+        shadowRadius: 16,
+        shadowOffset: { width: 0, height: 0 },
+    },
+    swipeHints: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+        marginTop: 34,
+    },
+    swipeHintText: {
+        color: '#33475C',
+        fontSize: 10,
+        letterSpacing: 1,
+    },
+    noAudioMessage: {
+        color: '#5A6B80',
+        fontSize: 15,
+        marginTop: 12,
+        textAlign: 'center',
+    },
 });
 
 export default FeedWithTopics;
