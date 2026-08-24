@@ -5,7 +5,7 @@ const getAllAudios = async (req, res) => {
     const bucket = createGridFSBucket();
     const apiUrl = (process.env.API_URL || `http://localhost:${process.env.PORT || 3030}`).replace(/\/$/, '');
     const { topico } = req.query;  // Recebe o tópico da query string
-
+    //teste
     let query = {};
     if (topico) {
       try {
