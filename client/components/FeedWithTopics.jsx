@@ -13,7 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
-const BASE_URL = 'http://10.0.0.61:3030/audios';
+const BASE_URL = 'http://192.168.15.3:3030/audios';
 
 const CATEGORIES = ['Todos', 'Música', 'Games', 'Culinária', 'Engraçados'];
 
@@ -201,24 +201,24 @@ const FeedWithTopics = () => {
                 <View style={styles.topicPill}>
                     <Text style={styles.topicText}>{CATEGORIES[categoryIndex]}</Text>
                 </View>
-                <Text style={styles.swipeDownHint}>↓ deslize para trocar de tópico</Text>
+                <Text style={styles.swipeDownHint}>↓ deslize para trocar de tópico </Text>
             </View>
 
             <View style={styles.audioContainer}>
                 {isLoading ? (
                     <View style={styles.centered}>
-                        <ActivityIndicator size="large" color="#00F0FF" />
+                        <ActivityIndicator size="large" color="#000000" />
                         <Text style={styles.loadingText}>CARREGANDO...</Text>
                     </View>
                 ) : hasError ? (
                     <View style={styles.centered}>
-                        <Ionicons name="cloud-offline-outline" size={48} color="#3E5468" />
+                        <Ionicons name="cloud-offline-outline" size={48} color="#000000" />
                         <Text style={styles.noAudioMessage}>Não foi possível carregar os áudios</Text>
                     </View>
                 ) : audios.length > 0 ? (
                     <View style={styles.titleAndButtonContainer}>
                         <View style={styles.iconRing}>
-                            <MaterialIcons name="graphic-eq" size={70} color="#00F0FF" />
+                            <MaterialIcons name="graphic-eq" size={70} color="#000000" />
                         </View>
                         <Text style={styles.filename} numberOfLines={1}>
                             {audios[playingIndex]?.filename}
@@ -254,10 +254,10 @@ const FeedWithTopics = () => {
     );
 };
 
-const NEON = '#00F0FF';
-const BG = '#0B0F1A';
-const PANEL = '#121826';
-const BORDER = '#1E2A3D';
+const NEON = '#2E7D32';
+const BG = '#FFFFFF';
+const PANEL = '#F1F8E9';
+const BORDER = '#A5D6A7';
 
 const styles = StyleSheet.create({
     gestureContainer: {
@@ -278,8 +278,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: PANEL,
-        borderBottomLeftRadius: 20,
-        borderBottomRightRadius: 20,
+    
         borderBottomWidth: 1,
         borderBottomColor: BORDER,
     },
@@ -299,7 +298,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     swipeDownHint: {
-        color: '#4C5D73',
+        color: '#4B6B4D',
         fontSize: 11,
         letterSpacing: 0.5,
     },
@@ -314,7 +313,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     loadingText: {
-        color: '#4C5D73',
+        color: '#4B6B4D',
         fontSize: 12,
         letterSpacing: 2,
         marginTop: 12,
@@ -341,14 +340,14 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 0 },
     },
     filename: {
-        color: '#E6F7FA',
+        color: '#000000',
         fontSize: 17,
         textAlign: 'center',
         marginBottom: 4,
         maxWidth: '100%',
     },
     trackCounter: {
-        color: '#4C5D73',
+        color: '#4B6B4D',
         fontSize: 12,
         letterSpacing: 1,
         marginBottom: 26,

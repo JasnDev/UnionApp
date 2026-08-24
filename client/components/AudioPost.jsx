@@ -20,14 +20,15 @@ import GestureRecognizer from 'react-native-swipe-gestures';
 
 const { width, height } = Dimensions.get('window');
 
-const UPLOAD_URL = 'http://10.0.0.61:3030/upload';
+const UPLOAD_URL = 'http://192.168.15.3:3030/upload';
 
-const TOPICS = ['Música', 'Games', 'Culinária', 'Engraçados'];
+const TOPICS = ['Música ', 'Games', 'Culinária ', 'Engraçados'];
 
 const AudioPost = () => {
     // recordingRef guarda a gravação em andamento de forma síncrona,
     // evitando a race condition entre onPressIn/onPressOut (setState é assíncrono).
     const recordingRef = useRef(null);
+    const recordingStartRef = useRef(null);
 
     const [recordingUri, setRecordingUri] = useState(null);
     const [sound, setSound] = useState(null);
@@ -72,19 +73,26 @@ const AudioPost = () => {
                 return;
             }
             setIsRecording(true);
-            const { recording } = await Audio.Recording.createAsync(
+            recordingStartRef.current = Audio.Recording.createAsync(
                 Audio.RecordingOptionsPresets.HIGH_QUALITY
             );
+            const { recording } = await recordingStartRef.current;
             recordingRef.current = recording;
         } catch (error) {
             console.error('Erro ao iniciar a gravação:', error);
             setIsRecording(false);
+        } finally {
+            recordingStartRef.current = null;
         }
     };
 
     const stopRecording = async () => {
         try {
             setIsRecording(false);
+
+            if (recordingStartRef.current) {
+                await recordingStartRef.current;
+            }
 
             if (!recordingRef.current) {
                 console.warn('Nenhuma gravação em andamento para parar.');
@@ -239,10 +247,10 @@ const AudioPost = () => {
                     },
                 ]}
             >
-                <MaterialIcons name="multitrack-audio" size={70} color="#00F0FF" />
+                <MaterialIcons name="multitrack-audio" size={70} color="#2E7D32" />
             </Animated.View>
 
-            <Pressable onPressIn={startRecording} onPressOut={stopRecording}>
+            <Pressable onPress={isRecording ? stopRecording : startRecording}>
                 <Animated.View
                     style={[
                         styles.micButton,
@@ -253,12 +261,12 @@ const AudioPost = () => {
                     <Ionicons
                         name={isRecording ? 'mic' : 'mic-circle-outline'}
                         size={70}
-                        color={isRecording ? '#FFFF' : '#00F0FF'}
+                        color={isRecording ? '#FFFFFF' : '#2E7D32'}
                     />
                 </Animated.View>
             </Pressable>
             <Text style={styles.statusText}>
-                {isRecording ? 'GRAVANDO...' : 'Segure para gravar'}
+                {isRecording ? 'TOQUE PARA PARAR' : 'TOQUE PARA GRAVAR'}
             </Text>
 
             {recordingUri ? (
@@ -325,10 +333,10 @@ const AudioPost = () => {
     );
 };
 
-const NEON = '#00F0FF';
-const BG = '#0B0F1A';
-const PANEL = '#121826';
-const BORDER = '#1E2A3D';
+const NEON = '#2E7D32';
+const BG = '#FFFFFF';
+const PANEL = '#F1F8E9';
+const BORDER = '#A5D6A7';
 
 const styles = StyleSheet.create({
     container: {
@@ -337,7 +345,7 @@ const styles = StyleSheet.create({
         height:'100%',
         backgroundColor: BG,
         paddingHorizontal: 24,
-        paddingTop: 900,
+        paddingTop: 24,
         paddingBottom: 30,
         alignItems: 'center',
         justifyContent: 'center',
@@ -358,7 +366,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         width: '100%',
-        marginTop:-950,
+        marginTop: 0,
         marginBottom: 32,
     },
 
@@ -431,7 +439,7 @@ const styles = StyleSheet.create({
         },
 
         elevation: 8,
-        marginTop:300
+        marginTop: 0,
     },
 
     micButtonActive: {
@@ -454,7 +462,7 @@ const styles = StyleSheet.create({
     // =========================
 
     statusText: {
-        color: '#f6fcfd',
+        color: '#1B5E20',
         fontSize: 13,
         fontWeight: '600',
 
@@ -467,7 +475,7 @@ const styles = StyleSheet.create({
     },
 
     hintText: {
-        color: '#ffffff',
+        color: '#1B5E20',
         fontSize: 13,
 
         marginTop: 25,
@@ -546,7 +554,7 @@ const styles = StyleSheet.create({
     },
 
     sectionLabel: {
-        color: '#fff',
+        color: '#1B5E20',
         fontSize: 11,
         fontWeight: '600',
 
@@ -581,7 +589,7 @@ const styles = StyleSheet.create({
     topicButtonActive: {
         borderColor: NEON,
 
-        backgroundColor: 'rgba(0, 240, 255, 0.12)',
+        backgroundColor: '#E8F5E9',
         color:'WHITE',
         shadowColor: NEON,
         shadowOpacity: 0.35,
@@ -595,17 +603,15 @@ const styles = StyleSheet.create({
     },
 
     topicText: {
-        color: '#fff',
+        color: '#1B5E20',
         fontSize: 13,
         fontWeight: '500',
-        marginTop:'-5%'
+        marginTop: 0
     },
 
     topicTextActive: {
-        color: "#FFF",
-        fontWeight: '700',
-        color:'#fff',
-         marginTop:'-5%'
+        color: '#1B5E20',
+        fontWeight: '700'
     },
 
     // =========================
@@ -623,13 +629,13 @@ const styles = StyleSheet.create({
     },
 
     swipeHintText: {
-        color: '#FFF',
+        color: '#1B5E20',
         fontSize: 10,
 
         letterSpacing: 1,
 
         textAlign: 'center',
-         marginTop:'-18%'
+        marginTop: 0
     },
 
     // =========================
@@ -645,7 +651,7 @@ const styles = StyleSheet.create({
         letterSpacing: 1,
 
         fontWeight: '600',
-         marginTop:'-5%'
+        marginTop: 0
     },
 });
 export default AudioPost;

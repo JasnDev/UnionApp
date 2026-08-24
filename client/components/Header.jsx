@@ -64,7 +64,7 @@ const Header = () => {
     ]}
     onPress={() => navigation.navigate('post')}
 >
-    <AntDesign name="plus" size={28} color="#00F0FF" />
+    <AntDesign name="plus" size={28} color="#000000" />
 </Pressable>
                     <Pressable
                         style={({ pressed }) => [styles.logoutButton, pressed && styles.iconButtonPressed]}
@@ -78,17 +78,17 @@ const Header = () => {
                     style={({ pressed }) => [styles.loginButton, pressed && styles.iconButtonPressed]}
                     onPress={() => navigation.navigate('Login')}
                 >
-                    <FontAwesome name="user-o" size={22} color="#00F0FF" />
+                    <FontAwesome name="user-o" size={22} color="#020202" />
                 </Pressable>
             )}
         </View>
     );
 };
 
-const NEON = '#00F0FF';
-const BG = '#0B0F1A';
-const PANEL = '#121826';
-const BORDER = '#1E2A3D';
+const NEON = '#2E7D32';
+const BG = '#FFFFFF';
+const PANEL = '#F1F8E9';
+const BORDER = '#A5D6A7';
 
 const styles = StyleSheet.create({
     headerContainer: {
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
         borderColor: BORDER,
     },
     logoutText: {
-        color: '#7FA9B5',
+        color: '#1B5E20',
         fontSize: 13,
         fontWeight: '700',
         letterSpacing: 1.5,
@@ -141,7 +141,6 @@ const styles = StyleSheet.create({
         height: 46,
         borderRadius: 23,
         borderWidth: 1,
-        borderColor: NEON,
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: BG,

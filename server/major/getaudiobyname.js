@@ -10,15 +10,15 @@ const getAudio = async (req, res) => {
     // Verifica se o arquivo existe no bucket
     const cursor = bucket.find({ filename });
 
-    const fileExists = await cursor.hasNext();
-    if (!fileExists) {
+    const file = await cursor.next();
+    if (!file) {
       return res.status(404).json({ error: 'Arquivo não encontrado' });
     }
 
     // Cria um stream de leitura a partir do bucket
     const downloadStream = bucket.openDownloadStreamByName(filename);
 
-    res.setHeader('Content-Type', 'audio/mpeg'); // Altere conforme o tipo de conteúdo esperado
+    res.setHeader('Content-Type', file.contentType || 'audio/mp4');
     downloadStream.pipe(res);
 
     downloadStream.on('error', (error) => {

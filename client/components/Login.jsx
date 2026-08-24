@@ -13,7 +13,7 @@ import axios from "axios";
 import * as Crypto from 'expo-crypto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const LOGIN_URL = 'http://10.0.0.61:3030/login';
+const LOGIN_URL = 'http://192.168.15.3:3030/login';
 const TOKEN_KEY = 'Authorization-token';
 
 const Login = () => {
@@ -99,7 +99,7 @@ const Login = () => {
                     onChangeText={setEmail}
                     style={styles.input}
                     placeholder="seu@email.com"
-                    placeholderTextColor="#4C5D73"
+                    placeholderTextColor="#444444"
                     value={email}
                     autoCapitalize="none"
                     autoCorrect={false}
@@ -112,7 +112,7 @@ const Login = () => {
                     onChangeText={setSenha}
                     style={styles.input}
                     placeholder="Insira sua senha"
-                    placeholderTextColor="#4C5D73"
+                    placeholderTextColor="#444444"
                     secureTextEntry
                     value={senha}
                     autoCapitalize="none"
@@ -146,10 +146,10 @@ const Login = () => {
     );
 };
 
-const NEON = '#00F0FF';
-const BG = '#0B0F1A';
-const PANEL = '#121826';
-const BORDER = '#1E2A3D';
+const NEON = '#2E7D32';
+const BG = '#FFFFFF';
+const PANEL = '#F1F8E9';
+const BORDER = '#A5D6A7';
 
 const styles = StyleSheet.create({
     mainContainer: {
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 10,
         marginBottom: 22,
-        color: '#E6F7FA',
+        color: '#000000',
     },
 
     button: {

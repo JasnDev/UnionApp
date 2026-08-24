@@ -4,7 +4,7 @@ import AudioPost from '../components/AudioPost.jsx';
 
 export default function Postpage() {
     return (
-      <View >
+      <View style={{ flex: 1 }}>
         <AudioPost />
       </View>
     );

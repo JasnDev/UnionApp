@@ -12,7 +12,7 @@ import { useNavigation } from "@react-navigation/native";
 import axios from 'axios';
 import * as Crypto from 'expo-crypto';
 
-const REGISTER_URL = 'http://10.0.0.61:3030/registro';
+const REGISTER_URL = 'http://192.168.15.3:3030/registro';
 const EMAIL_REGEX = /^\S+@\S+\.\S+$/;
 
 const Register = () => {
@@ -113,12 +113,12 @@ const Register = () => {
             <View style={styles.gridOverlay} pointerEvents="none" />
 
             <Text style={styles.title}>REGISTRO</Text>
-            <Text style={styles.subtitle}>Crie sua conta</Text>
+            <Text style={styles.subtitle}>Crie sua conta </Text>
 
             <TextInput
                 style={styles.input}
                 placeholder="Nome de usuário"
-                placeholderTextColor="#4C5D73"
+                placeholderTextColor="#444444"
                 value={nome}
                 onChangeText={setNome}
                 autoCapitalize="words"
@@ -127,7 +127,7 @@ const Register = () => {
             <TextInput
                 style={styles.input}
                 placeholder="E-mail"
-                placeholderTextColor="#4C5D73"
+                placeholderTextColor="#444444"
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -139,7 +139,7 @@ const Register = () => {
             <TextInput
                 style={styles.input}
                 placeholder="Senha"
-                placeholderTextColor="#4C5D73"
+                placeholderTextColor="#444444"
                 value={senha}
                 onChangeText={setSenha}
                 secureTextEntry
@@ -150,7 +150,7 @@ const Register = () => {
             <TextInput
                 style={styles.input}
                 placeholder="Confirmar senha"
-                placeholderTextColor="#4C5D73"
+                placeholderTextColor="#444444"
                 value={confirmarSenha}
                 onChangeText={setConfirmarSenha}
                 secureTextEntry
@@ -177,16 +177,16 @@ const Register = () => {
             </Pressable>
 
             <Pressable onPress={() => navigation.navigate('Login')}>
-                <Text style={styles.loginLink}>Já tem uma conta? <Text style={styles.loginLinkHighlight}>Entrar</Text></Text>
+                <Text style={styles.loginLink}>Já tem uma conta? <Text style={styles.loginLinkHighlight}> Entrar </Text> </Text>
             </Pressable>
         </View>
     );
 };
 
-const NEON = '#00F0FF';
-const BG = '#0B0F1A';
-const PANEL = '#121826';
-const BORDER = '#1E2A3D';
+const NEON = '#2E7D32';
+const BG = '#FFFFFF';
+const PANEL = '#F1F8E9';
+const BORDER = '#A5D6A7';
 
 const styles = StyleSheet.create({
     container: {
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 10,
         marginBottom: 16,
-        color: '#E6F7FA',
+        color: '#000000',
     },
     button: {
         width: '100%',
