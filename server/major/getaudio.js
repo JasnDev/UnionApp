@@ -3,6 +3,7 @@ import createGridFSBucket from "../connection/connection2.js";
 const getAllAudios = async (req, res) => {
   try {
     const bucket = createGridFSBucket();
+    const apiUrl = (process.env.API_URL || `http://localhost:${process.env.PORT || 3030}`).replace(/\/$/, '');
     const { topico } = req.query;  // Recebe o tópico da query string
 
     let query = {};
@@ -21,7 +22,7 @@ const getAllAudios = async (req, res) => {
     // Processa os arquivos encontrados
     await cursor.forEach((file) => {
       const fileSizeInMB = (file.length / (1024 * 1024)).toFixed(2); // Tamanho em MB
-      const audioUrl = `http://192.168.15.3:3030/audio/${encodeURIComponent(file.filename)}`;
+      const audioUrl = `${apiUrl}/audio/${encodeURIComponent(file.filename)}`;
 
       audios.push({
         filename: file.filename,
@@ -39,7 +40,7 @@ const getAllAudios = async (req, res) => {
       const allAudios = [];
       await cursorAll.forEach((file) => {
         const fileSizeInMB = (file.length / (1024 * 1024)).toFixed(2);
-        const audioUrl = `http://192.168.15.3:3030/audio/${encodeURIComponent(file.filename)}`;
+        const audioUrl = `${apiUrl}/audio/${encodeURIComponent(file.filename)}`;
         
         allAudios.push({
           filename: file.filename,
