@@ -15,7 +15,7 @@ const Feed = ({ categoria }) => {
 
   useEffect(() => {
     axios
-      .get(`http://192.168.15.3:3030/audios?categoria=${categoria}`)
+      .get(`https://unionapp-hrw7.onrender.com/audios?categoria=${categoria}`)
       .then((response) => {
         const audioData = response.data.map((item, index) => ({
           id: index.toString(),

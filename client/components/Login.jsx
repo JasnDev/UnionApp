@@ -13,7 +13,7 @@ import axios from "axios";
 import * as Crypto from 'expo-crypto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const LOGIN_URL = 'http://192.168.15.3:3030/login';
+const LOGIN_URL = 'https://unionapp-hrw7.onrender.com/login';
 const TOKEN_KEY = 'Authorization-token';
 
 const Login = () => {

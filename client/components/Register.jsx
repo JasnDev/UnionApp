@@ -12,7 +12,7 @@ import { useNavigation } from "@react-navigation/native";
 import axios from 'axios';
 import * as Crypto from 'expo-crypto';
 
-const REGISTER_URL = 'http://192.168.15.3:3030/registro';
+const REGISTER_URL = 'https://unionapp-hrw7.onrender.com/registro';
 const EMAIL_REGEX = /^\S+@\S+\.\S+$/;
 
 const Register = () => {

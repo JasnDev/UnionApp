@@ -20,7 +20,7 @@ import GestureRecognizer from 'react-native-swipe-gestures';
 
 const { width, height } = Dimensions.get('window');
 
-const UPLOAD_URL = 'http://192.168.15.3:3030/upload';
+const UPLOAD_URL = 'https://unionapp-hrw7.onrender.com/upload';
 
 const TOPICS = ['Música ', 'Games', 'Culinária ', 'Engraçados'];
 

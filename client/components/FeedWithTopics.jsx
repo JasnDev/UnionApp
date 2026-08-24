@@ -13,7 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
-const BASE_URL = 'http://192.168.15.3:3030/audios';
+const BASE_URL = 'https://unionapp-hrw7.onrender.com/audios';
 
 const CATEGORIES = ['Todos', 'Música', 'Games', 'Culinária', 'Engraçados'];
 
@@ -38,6 +38,7 @@ const FeedWithTopics = () => {
     // o novo valor quando a próxima chamada de AudioPlay dispara, e o
     // som anterior nunca é parado/descarregado (ficava tocando por baixo).
     const soundRef = useRef(null);
+    const playRequestRef = useRef(0);
 
     // Guarda os áudios e o índice atual em refs também, para que o efeito
     // de foco (isFocused) sempre veja o valor mais recente sem precisar
@@ -69,13 +70,20 @@ const FeedWithTopics = () => {
             return;
         }
 
+        const requestId = ++playRequestRef.current;
         await unloadCurrentSound();
+        if (requestId !== playRequestRef.current) return;
 
         try {
             const { sound } = await Audio.Sound.createAsync(
                 { uri },
                 { shouldPlay: true, isLooping: true }
             );
+            if (requestId !== playRequestRef.current) {
+                await sound.stopAsync();
+                await sound.unloadAsync();
+                return;
+            }
             soundRef.current = sound;
             setPlayingIndex(index);
             setIsPlaying(true);
