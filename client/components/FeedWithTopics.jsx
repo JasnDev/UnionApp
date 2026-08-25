@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
     ActivityIndicator,
+    AccessibilityInfo,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -10,7 +11,7 @@ import GestureRecognizer from 'react-native-swipe-gestures';
 import { Audio } from 'expo-av';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
-import { useIsFocused } from '@react-navigation/native';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 const BASE_URL = 'https://unionapp-hrw7.onrender.com/audios';
@@ -18,8 +19,8 @@ const BASE_URL = 'https://unionapp-hrw7.onrender.com/audios';
 const CATEGORIES = ['Todos', 'Música', 'Games', 'Culinária', 'Engraçados'];
 
 const SWIPE_CONFIG = {
-    velocityThreshold: 0.5,
-    directionalOffsetThreshold: 80,
+    velocityThreshold: 0.3,
+    directionalOffsetThreshold: 30,
 };
 
 const FeedWithTopics = () => {
@@ -31,6 +32,7 @@ const FeedWithTopics = () => {
     const [hasError, setHasError] = useState(false);
 
     const isFocused = useIsFocused();
+    const navigation = useNavigation();
 
     // soundRef guarda o objeto de áudio atual de forma síncrona.
     // Usar apenas useState aqui causa condição de corrida: se o usuário
@@ -39,18 +41,6 @@ const FeedWithTopics = () => {
     // som anterior nunca é parado/descarregado (ficava tocando por baixo).
     const soundRef = useRef(null);
     const playRequestRef = useRef(0);
-
-    // Guarda os áudios e o índice atual em refs também, para que o efeito
-    // de foco (isFocused) sempre veja o valor mais recente sem precisar
-    // recriar o efeito a cada mudança de estado.
-    const audiosRef = useRef(audios);
-    const playingIndexRef = useRef(playingIndex);
-    useEffect(() => {
-        audiosRef.current = audios;
-    }, [audios]);
-    useEffect(() => {
-        playingIndexRef.current = playingIndex;
-    }, [playingIndex]);
 
     const unloadCurrentSound = useCallback(async () => {
         if (soundRef.current) {
@@ -124,9 +114,7 @@ const FeedWithTopics = () => {
                 const data = response.data || [];
                 setAudios(data);
                 setPlayingIndex(0);
-                if (data.length > 0) {
-                    AudioPlay(data[0].url, 0);
-                } else {
+                if (data.length === 0) {
                     unloadCurrentSound();
                 }
             })
@@ -149,13 +137,7 @@ const FeedWithTopics = () => {
 
     // Pausa/retoma o áudio conforme a tela ganha ou perde foco.
     useEffect(() => {
-        if (isFocused) {
-            const currentAudios = audiosRef.current;
-            const currentIndex = playingIndexRef.current;
-            if (currentAudios.length > 0) {
-                AudioPlay(currentAudios[currentIndex]?.url, currentIndex);
-            }
-        } else {
+        if (!isFocused) {
             AudioPause();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -168,35 +150,59 @@ const FeedWithTopics = () => {
         };
     }, [unloadCurrentSound]);
 
+    const selectAudio = (index) => {
+        const audio = audios[index];
+        if (!audio) return;
+
+        setPlayingIndex(index);
+        AudioPlay(audio.url, index);
+        AccessibilityInfo.announceForAccessibility(
+            `Reproduzindo ${audio.filename}, áudio ${index + 1} de ${audios.length}`
+        );
+    };
+
     const handlePlayPause = () => {
         if (isPlaying) {
             AudioPause();
+            AccessibilityInfo.announceForAccessibility('Áudio pausado');
         } else {
-            AudioPlay(audios[playingIndex]?.url, playingIndex);
+            selectAudio(playingIndex);
         }
     };
 
     const handleSwipeDown = () => {
-        setCategoryIndex((prev) => (prev + 1) % CATEGORIES.length);
+        setCategoryIndex((prev) => {
+            const nextIndex = (prev + 1) % CATEGORIES.length;
+            AccessibilityInfo.announceForAccessibility(
+                `Tópico ${CATEGORIES[nextIndex]}`
+            );
+            return nextIndex;
+        });
+    };
+
+    const handleSwipeUp = () => {
+        playRequestRef.current += 1;
+        unloadCurrentSound();
+        navigation.navigate('post');
     };
 
     const handleSwipeLeft = () => {
         if (playingIndex < audios.length - 1) {
-            AudioPlay(audios[playingIndex + 1]?.url, playingIndex + 1);
+            selectAudio(playingIndex + 1);
         }
     };
 
     const handleSwipeRight = () => {
         if (playingIndex > 0) {
-            AudioPlay(audios[playingIndex - 1]?.url, playingIndex - 1);
+            selectAudio(playingIndex - 1);
         }
-     
     };
 
     return (
 
       <GestureRecognizer
             onSwipeDown={handleSwipeDown}
+            onSwipeUp={handleSwipeUp}
             onSwipeLeft={handleSwipeLeft}
             onSwipeRight={handleSwipeRight}
             config={SWIPE_CONFIG}
@@ -206,10 +212,22 @@ const FeedWithTopics = () => {
   <View style={styles.gridOverlay} pointerEvents="none" />
 
             <View style={styles.topicsContainer}>
-                <View style={styles.topicPill}>
+                <TouchableOpacity
+                    style={styles.topicPill}
+                    accessible
+                    accessibilityRole="button"
+                    accessibilityLabel={`Tópico ${CATEGORIES[categoryIndex]}`}
+                    accessibilityHint="Toque duas vezes para trocar de tópico"
+                    onPress={handleSwipeDown}
+                >
                     <Text style={styles.topicText}>{CATEGORIES[categoryIndex]}</Text>
-                </View>
-                <Text style={styles.swipeDownHint}>↓ deslize para trocar de tópico </Text>
+                </TouchableOpacity>
+                <Text style={styles.swipeDownHint} accessibilityElementsHidden>
+                    Deslize ou toque no tópico para trocar
+                </Text>
+                <Text style={styles.swipeDownHint} accessibilityElementsHidden>
+                    Deslize para cima para gravar um áudio
+                </Text>
             </View>
 
             <View style={styles.audioContainer}>
@@ -231,13 +249,33 @@ const FeedWithTopics = () => {
                         <Text style={styles.filename} numberOfLines={1}>
                             {audios[playingIndex]?.filename}
                         </Text>
-                        <Text style={styles.trackCounter}>
+                        <Text
+                            style={styles.trackCounter}
+                            accessibilityLiveRegion="polite"
+                        >
                             {playingIndex + 1} / {audios.length}
                         </Text>
+
+                        <View style={styles.audioControls}>
+                        <TouchableOpacity
+                            onPress={() => selectAudio(playingIndex - 1)}
+                            disabled={playingIndex === 0}
+                            accessible
+                            accessibilityRole="button"
+                            accessibilityLabel="Áudio anterior"
+                            accessibilityState={{ disabled: playingIndex === 0 }}
+                            style={styles.navigationButton}
+                        >
+                            <Ionicons name="play-back" size={28} color="#0B0F1A" />
+                        </TouchableOpacity>
 
                         <TouchableOpacity
                             onPress={handlePlayPause}
                             style={styles.playPauseButton}
+                            accessible
+                            accessibilityRole="button"
+                            accessibilityLabel={isPlaying ? 'Pausar áudio' : 'Reproduzir áudio'}
+                            accessibilityHint="Toque duas vezes para alterar a reprodução"
                         >
                             <Ionicons
                                 name={isPlaying ? 'pause' : 'play'}
@@ -245,6 +283,19 @@ const FeedWithTopics = () => {
                                 color="#0B0F1A"
                             />
                         </TouchableOpacity>
+
+                        <TouchableOpacity
+                            onPress={() => selectAudio(playingIndex + 1)}
+                            disabled={playingIndex === audios.length - 1}
+                            accessible
+                            accessibilityRole="button"
+                            accessibilityLabel="Próximo áudio"
+                            accessibilityState={{ disabled: playingIndex === audios.length - 1 }}
+                            style={styles.navigationButton}
+                        >
+                            <Ionicons name="play-forward" size={28} color="#0B0F1A" />
+                        </TouchableOpacity>
+                        </View>
 
                         <View style={styles.swipeHints}>
                             <Text style={styles.swipeHintText}>← ANTERIOR</Text>
@@ -371,6 +422,18 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.7,
         shadowRadius: 16,
         shadowOffset: { width: 0, height: 0 },
+    },
+    audioControls: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 18,
+    },
+    navigationButton: {
+        width: 48,
+        height: 48,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     swipeHints: {
         flexDirection: 'row',

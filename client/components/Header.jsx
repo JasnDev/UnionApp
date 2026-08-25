@@ -63,12 +63,19 @@ const Header = () => {
         pressed && styles.iconButtonPressed,
     ]}
     onPress={() => navigation.navigate('post')}
+    accessible
+    accessibilityRole="button"
+    accessibilityLabel="Adicionar novo áudio"
+    accessibilityHint="Abre a tela para publicar um áudio"
 >
     <AntDesign name="plus" size={28} color="#000000" />
 </Pressable>
                     <Pressable
                         style={({ pressed }) => [styles.logoutButton, pressed && styles.iconButtonPressed]}
                         onPress={handleLogout}
+                        accessible
+                        accessibilityRole="button"
+                        accessibilityLabel="Sair da conta"
                     >
                         <Text style={styles.logoutText}>SAIR</Text>
                     </Pressable>
@@ -77,6 +84,9 @@ const Header = () => {
                 <Pressable
                     style={({ pressed }) => [styles.loginButton, pressed && styles.iconButtonPressed]}
                     onPress={() => navigation.navigate('Login')}
+                    accessible
+                    accessibilityRole="button"
+                    accessibilityLabel="Entrar na conta"
                 >
                     <FontAwesome name="user-o" size={22} color="#020202" />
                 </Pressable>
