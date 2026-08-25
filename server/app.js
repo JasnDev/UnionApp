@@ -29,6 +29,10 @@ app.post('/registro', regis);
 app.post('/login', login);
 app.post('/upload', upload.single('audio'), Audio);
 
-app.listen(port, () => {
-  console.log(`Servidor rodando na porta ${port}`);
-});
+if (!process.env.VERCEL) {
+  app.listen(port, () => {
+    console.log(`Servidor rodando na porta ${port}`);
+  });
+}
+
+export default app;

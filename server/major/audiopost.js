@@ -20,7 +20,7 @@ const uploadAudio = async (req, res) => {
     }
 
     // Caminho completo do arquivo enviado na pasta uploads
-    const audioPath = path.join(__dirname, '../uploads', audio.filename);  // Ajustado para apontar para o arquivo específico
+    const audioPath = audio.path;
 
     // Verificar se o arquivo realmente existe
     if (!fs.existsSync(audioPath)) {

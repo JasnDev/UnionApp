@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+//teste 
+
 const login = async (req, res) => {
   try {
     const verifyEmail = await registro.findOne({ email: req.body.email });
