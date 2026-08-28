@@ -23,6 +23,16 @@ const SWIPE_CONFIG = {
     directionalOffsetThreshold: 30,
 };
 
+const FEED_START_DATE = new Date(2026, 7, 27, 23, 35, 0);
+
+const isCreatedAfterStartDate = (uploadDate) => {
+    if (!uploadDate) return false;
+
+    const date = new Date(uploadDate);
+
+    return !Number.isNaN(date.getTime()) && date >= FEED_START_DATE;
+};
+
 const FeedWithTopics = () => {
     const [categoryIndex, setCategoryIndex] = useState(0);
     const [audios, setAudios] = useState([]);
@@ -111,7 +121,9 @@ const FeedWithTopics = () => {
             .get(url)
             .then((response) => {
                 if (cancelled) return;
-                const data = response.data || [];
+                const data = (response.data || []).filter((audio) =>
+                    isCreatedAfterStartDate(audio.uploadDate)
+                );
                 setAudios(data);
                 setPlayingIndex(0);
                 if (data.length === 0) {

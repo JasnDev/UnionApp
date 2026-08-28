@@ -1,16 +1,18 @@
 import { Audio } from 'expo-av';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-    Alert,
     Animated,
     Dimensions,
     Easing,
+    Modal,
     Pressable,
+    Platform,
     StyleSheet,
     Text,
     View,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useNavigation } from '@react-navigation/native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 // Import a partir do path "/legacy" evita o warning de depreciação do SDK 54+
 // mantendo a mesma API (copyAsync, deleteAsync, documentDirectory) sem precisar
@@ -29,6 +31,7 @@ const AudioPost = () => {
     // evitando a race condition entre onPressIn/onPressOut (setState é assíncrono).
     const recordingRef = useRef(null);
     const recordingStartRef = useRef(null);
+    const navigation = useNavigation();
 
     const [recordingUri, setRecordingUri] = useState(null);
     const [sound, setSound] = useState(null);
@@ -37,12 +40,35 @@ const AudioPost = () => {
     const [isRecording, setIsRecording] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [selectedTopic, setSelectedTopic] = useState(null);
+    const [dialog, setDialog] = useState({
+        visible: false,
+        title: '',
+        message: '',
+        confirmText: 'OK',
+        onConfirm: null,
+    });
 
     // --- Animação de pulso do botão de gravação ---
   
     const glowAnim = useRef(new Animated.Value(0)).current;
 
    const pulseAnim = useRef(new Animated.Value(1)).current;
+
+    const showMessage = (title, message) => {
+        setDialog({ visible: true, title, message, confirmText: 'OK', onConfirm: null });
+    };
+
+    const showConfirmation = (title, message, onConfirm) => {
+        setDialog({ visible: true, title, message, confirmText: 'Confirmar', onConfirm });
+    };
+
+    const closeDialog = () => setDialog((current) => ({ ...current, visible: false }));
+
+    const confirmDialog = () => {
+        const action = dialog.onConfirm;
+        closeDialog();
+        if (action) action();
+    };
 
 
     // --- Configura o modo de áudio uma única vez ao montar ---
@@ -69,7 +95,7 @@ const AudioPost = () => {
         try {
             const { granted } = await Audio.requestPermissionsAsync();
             if (!granted) {
-                Alert.alert('Permissão negada', 'É necessário conceder permissão para gravar áudio.');
+                showMessage('Permissão negada', 'É necessário conceder permissão para gravar áudio.');
                 return;
             }
             setIsRecording(true);
@@ -116,18 +142,15 @@ const AudioPost = () => {
 
     const save = async () => {
         if (!recordingUri || !selectedTopic) {
-            Alert.alert('Erro', 'Selecione um tópico antes de salvar.');
+            showMessage('Erro', 'Selecione um tópico antes de salvar.');
             return;
         }
         if (isSaving) return; // evita envio duplicado por swipe repetido
 
-        Alert.alert(
+        showConfirmation(
             'Enviar áudio',
             `Enviar este áudio no tópico "${selectedTopic}"?`,
-            [
-                { text: 'Cancelar', style: 'cancel' },
-                { text: 'Enviar', onPress: () => performSave() },
-            ]
+            performSave
         );
     };
 
@@ -135,16 +158,23 @@ const AudioPost = () => {
         setIsSaving(true);
         try {
             const fileName = buildUniqueFileName();
-            const fileUri = FileSystem.documentDirectory + fileName;
-            await FileSystem.copyAsync({ from: recordingUri, to: fileUri });
-            setFileUrl(fileUri);
-
             const formData = new FormData();
-            formData.append('audio', {
-                uri: fileUri,
-                type: 'audio/m4a',
-                name: fileName,
-            });
+            let fileUri = recordingUri;
+
+            if (Platform.OS === 'web') {
+                const audioBlob = await fetch(recordingUri).then((response) => response.blob());
+                formData.append('audio', audioBlob, fileName);
+            } else {
+                fileUri = FileSystem.documentDirectory + fileName;
+                await FileSystem.copyAsync({ from: recordingUri, to: fileUri });
+                formData.append('audio', {
+                    uri: fileUri,
+                    type: 'audio/m4a',
+                    name: fileName,
+                });
+            }
+
+            setFileUrl(fileUri);
             formData.append('topic', selectedTopic);
 
             const response = await fetch(UPLOAD_URL, {
@@ -158,10 +188,11 @@ const AudioPost = () => {
 
             const data = await response.json();
             console.log('Áudio enviado com sucesso:', data);
-            Alert.alert('Sucesso', 'Áudio enviado com sucesso!');
+            showMessage('Sucesso', 'Áudio enviado com sucesso!');
+            navigation.navigate('Home');
         } catch (error) {
             console.error('Erro ao enviar o áudio:', error);
-            Alert.alert('Erro', 'Erro ao enviar o áudio.');
+            showMessage('Erro', 'Erro ao enviar o áudio.');
         } finally {
             setIsSaving(false);
         }
@@ -195,15 +226,15 @@ const AudioPost = () => {
     const deleteAudio = () => {
         if (!recordingUri) return;
 
-        Alert.alert(
+        showConfirmation(
             'Apagar áudio',
             'Tem certeza que deseja apagar esta gravação?',
-            [
-                { text: 'Cancelar', style: 'cancel' },
-                { text: 'Apagar', style: 'destructive', onPress: () => performDelete() },
-            ]
+            performDelete
         );
     };
+
+    
+
 
     const performDelete = async () => {
         try {
@@ -212,11 +243,18 @@ const AudioPost = () => {
                 setSound(null);
                 setIsPlaying(false);
             }
-            await FileSystem.deleteAsync(recordingUri, { idempotent: true });
+            if (Platform.OS === 'web') {
+                if (recordingUri.startsWith('blob:')) {
+                    URL.revokeObjectURL(recordingUri);
+                }
+            } else {
+                await FileSystem.deleteAsync(recordingUri, { idempotent: true });
+            }
             setRecordingUri(null);
             setFileUrl(null);
             setSelectedTopic(null);
-            Alert.alert('Áudio apagado', 'O áudio foi apagado com sucesso.');
+            showMessage('Áudio apagado', 'O áudio foi apagado com sucesso.');
+            navigation.navigate('Home');
         } catch (error) {
             console.error('Erro ao apagar o áudio:', error);
         }
@@ -317,9 +355,33 @@ const AudioPost = () => {
                     </View>
 
                     <View style={styles.swipeHints}>
-                        <Text style={styles.swipeHintText}>← ENVIAR</Text>
-                        <Text style={styles.swipeHintText}>↑ TOCAR</Text>
-                        <Text style={styles.swipeHintText}>APAGAR →</Text>
+                        <Pressable
+                            style={styles.swipeHintButton}
+                            onPress={save}
+                            accessible
+                            accessibilityRole="button"
+                            accessibilityLabel="Enviar áudio"
+                        >
+                            <Text style={styles.swipeHintText}>← ENVIAR</Text>
+                        </Pressable>
+                        <Pressable
+                            style={styles.swipeHintButton}
+                            onPress={isPlaying ? pauseAudio : playAudio}
+                            accessible
+                            accessibilityRole="button"
+                            accessibilityLabel={isPlaying ? 'Pausar áudio' : 'Tocar áudio'}
+                        >
+                            <Text style={styles.swipeHintText}>↑ {isPlaying ? 'PAUSAR' : 'TOCAR'}</Text>
+                        </Pressable>
+                        <Pressable
+                            style={styles.swipeHintButton}
+                            onPress={deleteAudio}
+                            accessible
+                            accessibilityRole="button"
+                            accessibilityLabel="Apagar áudio"
+                        >
+                            <Text style={styles.swipeHintText}>APAGAR →</Text>
+                        </Pressable>
                     </View>
 
                     {isSaving && <Text style={styles.savingText}>Enviando...</Text>}
@@ -329,6 +391,44 @@ const AudioPost = () => {
                     Pressione e segure o microfone para começar
                 </Text>
             )}
+
+            <Modal
+                visible={dialog.visible}
+                transparent
+                animationType="fade"
+                onRequestClose={closeDialog}
+            >
+                <View style={styles.dialogOverlay}>
+                    <View
+                        style={styles.dialog}
+                        accessible
+                        accessibilityViewIsModal
+                    >
+                        <Text style={styles.dialogTitle}>{dialog.title}</Text>
+                        <Text style={styles.dialogMessage}>{dialog.message}</Text>
+                        <View style={styles.dialogActions}>
+                            {dialog.onConfirm && (
+                                <Pressable
+                                    style={styles.dialogCancelButton}
+                                    onPress={closeDialog}
+                                    accessibilityRole="button"
+                                    accessibilityLabel="Cancelar"
+                                >
+                                    <Text style={styles.dialogCancelText}>Cancelar</Text>
+                                </Pressable>
+                            )}
+                            <Pressable
+                                style={styles.dialogConfirmButton}
+                                onPress={confirmDialog}
+                                accessibilityRole="button"
+                                accessibilityLabel={dialog.confirmText}
+                            >
+                                <Text style={styles.dialogConfirmText}>{dialog.confirmText}</Text>
+                            </Pressable>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </GestureRecognizer>
     );
 };
@@ -636,6 +736,78 @@ const styles = StyleSheet.create({
 
         textAlign: 'center',
         marginTop: 0
+    },
+
+    swipeHintButton: {
+        minWidth: 80,
+        minHeight: 44,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    dialogOverlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 24,
+        backgroundColor: 'rgba(0, 0, 0, 0.45)',
+    },
+
+    dialog: {
+        width: '100%',
+        maxWidth: 420,
+        padding: 24,
+        borderRadius: 12,
+        backgroundColor: BG,
+        borderWidth: 1,
+        borderColor: BORDER,
+    },
+
+    dialogTitle: {
+        color: '#1B5E20',
+        fontSize: 18,
+        fontWeight: '700',
+        marginBottom: 10,
+    },
+
+    dialogMessage: {
+        color: '#263238',
+        fontSize: 15,
+        lineHeight: 22,
+    },
+
+    dialogActions: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        marginTop: 24,
+        gap: 12,
+    },
+
+    dialogCancelButton: {
+        minHeight: 44,
+        justifyContent: 'center',
+        paddingHorizontal: 14,
+    },
+
+    dialogCancelText: {
+        color: '#455A64',
+        fontSize: 14,
+        fontWeight: '600',
+    },
+
+    dialogConfirmButton: {
+        minHeight: 44,
+        justifyContent: 'center',
+        paddingHorizontal: 18,
+        borderRadius: 8,
+        backgroundColor: NEON,
+    },
+
+    dialogConfirmText: {
+        color: BG,
+        fontSize: 14,
+        fontWeight: '700',
     },
 
     // =========================
